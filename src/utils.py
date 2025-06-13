@@ -43,3 +43,5 @@ def format_number(n: int) -> str:
             return f"{n:.1f}{unit}"
         n /= 1000
     return f"{n:.1f}T"
+
+# Update Faker-based synthetic data generator [2025-06-13T14:21:17]
