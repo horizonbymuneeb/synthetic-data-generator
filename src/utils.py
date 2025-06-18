@@ -47,3 +47,5 @@ def format_number(n: int) -> str:
 # Update Faker-based synthetic data generator [2025-06-13T14:21:17]
 
 # WIP: debugging mode collapse in generator [2025-06-16T17:52:18]
+
+# Implement domain adaptation for transfer [2025-06-18T20:25:32]
