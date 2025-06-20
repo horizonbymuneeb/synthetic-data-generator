@@ -225,3 +225,4 @@
 [2025-06-16T17:52:18] WIP: debugging mode collapse in generator
 [2025-06-18T20:25:32] Implement domain adaptation for transfer
 [2025-06-19T18:56:22] Implement differential privacy noise addition
+[2025-06-20T09:05:53] Implement tabular GAN for synthetic records
