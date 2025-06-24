@@ -178,3 +178,5 @@ if __name__ == '__main__':
 # Implement differential privacy noise addition [2025-06-19T18:56:22]
 
 # Implement tabular GAN for synthetic records [2025-06-20T09:05:53]
+
+# Add support for long tail distributions [2025-06-24T11:27:26]
