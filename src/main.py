@@ -180,3 +180,5 @@ if __name__ == '__main__':
 # Implement tabular GAN for synthetic records [2025-06-20T09:05:53]
 
 # Add support for long tail distributions [2025-06-24T11:27:26]
+
+# Update training loop with EMA for stability [2025-07-01T18:33:57]
