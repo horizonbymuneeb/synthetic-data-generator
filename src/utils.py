@@ -53,3 +53,5 @@ def format_number(n: int) -> str:
 # Implement domain adaptation for transfer [2025-06-20T15:28:31]
 
 # Update Faker-based synthetic data generator [2025-06-25T14:23:40]
+
+# Add evaluation with FID score metric [2025-07-01T19:23:10]
