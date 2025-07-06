@@ -232,3 +232,4 @@
 [2025-07-01T19:23:10] Add evaluation with FID score metric
 [2025-07-01T18:33:57] Update training loop with EMA for stability
 [2025-07-02T14:48:49] Implement domain adaptation for transfer
+[2025-07-06T16:13:57] Implement domain adaptation for transfer
