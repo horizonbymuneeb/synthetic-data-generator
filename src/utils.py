@@ -63,3 +63,5 @@ def format_number(n: int) -> str:
 # Implement tabular GAN for synthetic records [2025-07-09T20:36:41]
 
 # Implement tabular GAN for synthetic records [2025-07-10T19:32:12]
+
+# Update documentation for generation API [2025-07-14T20:01:31]
