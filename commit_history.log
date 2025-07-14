@@ -238,3 +238,4 @@
 [2025-07-09T09:48:56] Update documentation for generation API
 [2025-07-10T19:32:12] Implement tabular GAN for synthetic records
 [2025-07-14T20:01:31] Update documentation for generation API
+[2025-07-14T16:57:23] WIP: training larger models on cloud GPUs
