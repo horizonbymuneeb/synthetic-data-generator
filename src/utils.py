@@ -67,3 +67,5 @@ def format_number(n: int) -> str:
 # Update documentation for generation API [2025-07-14T20:01:31]
 
 # WIP: training larger models on cloud GPUs [2025-07-14T16:57:23]
+
+# Add evaluation with FID score metric [2025-07-17T14:42:44]
