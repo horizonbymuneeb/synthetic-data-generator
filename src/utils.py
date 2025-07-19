@@ -71,3 +71,5 @@ def format_number(n: int) -> str:
 # Add evaluation with FID score metric [2025-07-17T14:42:44]
 
 # Update Faker-based synthetic data generator [2025-07-19T09:29:46]
+
+# Add data de-identification pipeline steps [2025-07-19T13:39:07]
