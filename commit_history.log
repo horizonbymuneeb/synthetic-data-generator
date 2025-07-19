@@ -242,3 +242,4 @@
 [2025-07-15T17:21:02] Add evaluation with FID score metric
 [2025-07-17T14:42:44] Add evaluation with FID score metric
 [2025-07-19T09:29:46] Update Faker-based synthetic data generator
+[2025-07-19T14:48:45] Implement conditional GAN for labeled data
