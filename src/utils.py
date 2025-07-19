@@ -69,3 +69,5 @@ def format_number(n: int) -> str:
 # WIP: training larger models on cloud GPUs [2025-07-14T16:57:23]
 
 # Add evaluation with FID score metric [2025-07-17T14:42:44]
+
+# Update Faker-based synthetic data generator [2025-07-19T09:29:46]
