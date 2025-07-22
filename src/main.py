@@ -190,3 +190,5 @@ if __name__ == '__main__':
 # Add evaluation with FID score metric [2025-07-15T17:21:02]
 
 # Implement conditional GAN for labeled data [2025-07-19T14:48:45]
+
+# Update training loop with EMA for stability [2025-07-22T17:34:18]
