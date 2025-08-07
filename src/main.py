@@ -194,3 +194,5 @@ if __name__ == '__main__':
 # Update training loop with EMA for stability [2025-07-22T17:34:18]
 
 # Add data de-identification pipeline steps [2025-07-27T13:15:50]
+
+# Implement differential privacy noise addition [2025-08-07T09:27:06]

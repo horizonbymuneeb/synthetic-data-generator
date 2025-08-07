@@ -250,3 +250,4 @@
 [2025-07-31T10:51:40] Implement latent space interpolation for samples
 [2025-08-01T14:55:00] Add VAE for image generation pipeline
 [2025-08-01T14:55:51] WIP: debugging mode collapse in generator
+[2025-08-07T09:27:06] Implement differential privacy noise addition
