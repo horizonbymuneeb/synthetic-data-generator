@@ -81,3 +81,5 @@ def format_number(n: int) -> str:
 # Add VAE for image generation pipeline [2025-08-01T14:55:00]
 
 # WIP: debugging mode collapse in generator [2025-08-01T14:55:51]
+
+# Update documentation for generation API [2025-08-11T12:17:35]
