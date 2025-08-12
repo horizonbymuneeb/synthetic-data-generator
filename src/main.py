@@ -198,3 +198,5 @@ if __name__ == '__main__':
 # Implement differential privacy noise addition [2025-08-07T09:27:06]
 
 # Add data de-identification pipeline steps [2025-08-12T19:05:39]
+
+# Implement tabular GAN for synthetic records [2025-08-12T11:34:47]
