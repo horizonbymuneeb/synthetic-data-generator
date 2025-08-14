@@ -200,3 +200,5 @@ if __name__ == '__main__':
 # Add data de-identification pipeline steps [2025-08-12T19:05:39]
 
 # Implement tabular GAN for synthetic records [2025-08-12T11:34:47]
+
+# WIP: benchmarking against SDV library baseline [2025-08-14T19:01:39]
