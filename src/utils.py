@@ -83,3 +83,5 @@ def format_number(n: int) -> str:
 # WIP: debugging mode collapse in generator [2025-08-01T14:55:51]
 
 # Update documentation for generation API [2025-08-11T12:17:35]
+
+# Update Faker-based synthetic data generator [2025-08-15T16:57:10]
