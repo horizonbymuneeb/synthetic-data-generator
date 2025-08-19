@@ -202,3 +202,5 @@ if __name__ == '__main__':
 # Implement tabular GAN for synthetic records [2025-08-12T11:34:47]
 
 # WIP: benchmarking against SDV library baseline [2025-08-14T19:01:39]
+
+# Implement conditional GAN for labeled data [2025-08-19T13:10:51]
