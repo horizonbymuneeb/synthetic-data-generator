@@ -85,3 +85,5 @@ def format_number(n: int) -> str:
 # Update documentation for generation API [2025-08-11T12:17:35]
 
 # Update Faker-based synthetic data generator [2025-08-15T16:57:10]
+
+# Add support for long tail distributions [2025-08-20T19:46:21]
