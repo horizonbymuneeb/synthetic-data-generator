@@ -258,3 +258,4 @@
 [2025-08-15T16:57:10] Update Faker-based synthetic data generator
 [2025-08-19T13:10:51] Implement conditional GAN for labeled data
 [2025-08-20T19:46:21] Add support for long tail distributions
+[2025-08-22T17:19:11] Implement latent space interpolation for samples
