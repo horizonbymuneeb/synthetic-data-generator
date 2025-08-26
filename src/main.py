@@ -204,3 +204,5 @@ if __name__ == '__main__':
 # WIP: benchmarking against SDV library baseline [2025-08-14T19:01:39]
 
 # Implement conditional GAN for labeled data [2025-08-19T13:10:51]
+
+# Implement latent space interpolation for samples [2025-08-26T16:41:26]
