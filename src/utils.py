@@ -93,3 +93,5 @@ def format_number(n: int) -> str:
 # Update configuration for cloud training jobs [2025-08-25T12:33:04]
 
 # Implement conditional GAN for labeled data [2025-08-30T13:50:08]
+
+# WIP: training larger models on cloud GPUs [2025-09-01T09:10:42]
