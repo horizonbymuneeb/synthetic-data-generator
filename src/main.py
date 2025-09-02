@@ -208,3 +208,5 @@ if __name__ == '__main__':
 # Implement latent space interpolation for samples [2025-08-26T16:41:26]
 
 # Add VAE for image generation pipeline [2025-09-01T20:25:52]
+
+# Add data de-identification pipeline steps [2025-09-02T14:01:16]
