@@ -266,3 +266,4 @@
 [2025-09-01T20:25:52] Add VAE for image generation pipeline
 [2025-09-02T14:01:16] Add data de-identification pipeline steps
 [2025-09-03T10:00:38] Update documentation for generation API
+[2025-09-08T20:40:31] Update Faker-based synthetic data generator
