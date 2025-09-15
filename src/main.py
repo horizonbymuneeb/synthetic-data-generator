@@ -218,3 +218,5 @@ if __name__ == '__main__':
 # Add data de-identification pipeline steps [2025-09-12T19:23:59]
 
 # Implement tabular GAN for synthetic records [2025-09-12T10:14:51]
+
+# WIP: training larger models on cloud GPUs [2025-09-15T09:58:18]
