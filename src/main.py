@@ -222,3 +222,5 @@ if __name__ == '__main__':
 # WIP: training larger models on cloud GPUs [2025-09-15T09:58:18]
 
 # Implement differential privacy noise addition [2025-09-17T19:07:59]
+
+# Implement domain adaptation for transfer [2025-09-17T14:17:12]
