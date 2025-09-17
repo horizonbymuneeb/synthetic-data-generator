@@ -220,3 +220,5 @@ if __name__ == '__main__':
 # Implement tabular GAN for synthetic records [2025-09-12T10:14:51]
 
 # WIP: training larger models on cloud GPUs [2025-09-15T09:58:18]
+
+# Implement differential privacy noise addition [2025-09-17T19:07:59]

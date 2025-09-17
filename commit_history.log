@@ -272,3 +272,4 @@
 [2025-09-12T10:14:51] Implement tabular GAN for synthetic records
 [2025-09-14T12:02:09] Implement data quality validation checks
 [2025-09-15T09:58:18] WIP: training larger models on cloud GPUs
+[2025-09-17T19:07:59] Implement differential privacy noise addition
