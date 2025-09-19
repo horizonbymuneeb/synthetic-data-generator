@@ -275,3 +275,4 @@
 [2025-09-17T19:07:59] Implement differential privacy noise addition
 [2025-09-17T14:17:12] Implement domain adaptation for transfer
 [2025-09-18T15:43:52] WIP: training larger models on cloud GPUs
+[2025-09-19T17:02:57] Add VAE for image generation pipeline

@@ -101,3 +101,5 @@ def format_number(n: int) -> str:
 # Implement data quality validation checks [2025-09-14T12:02:09]
 
 # WIP: training larger models on cloud GPUs [2025-09-18T15:43:52]
+
+# Add VAE for image generation pipeline [2025-09-19T17:02:57]
