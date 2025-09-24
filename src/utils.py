@@ -103,3 +103,5 @@ def format_number(n: int) -> str:
 # WIP: training larger models on cloud GPUs [2025-09-18T15:43:52]
 
 # Add VAE for image generation pipeline [2025-09-19T17:02:57]
+
+# Fix generator gradient instability during training [2025-09-24T19:02:47]
