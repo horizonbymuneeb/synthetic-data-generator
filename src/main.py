@@ -226,3 +226,5 @@ if __name__ == '__main__':
 # Implement domain adaptation for transfer [2025-09-17T14:17:12]
 
 # Fix generator gradient instability during training [2025-09-21T14:42:49]
+
+# WIP: benchmarking against SDV library baseline [2025-09-24T10:25:16]
