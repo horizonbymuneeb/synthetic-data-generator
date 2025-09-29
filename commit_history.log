@@ -279,3 +279,4 @@
 [2025-09-21T14:42:49] Fix generator gradient instability during training
 [2025-09-24T10:25:16] WIP: benchmarking against SDV library baseline
 [2025-09-24T19:02:47] Fix generator gradient instability during training
+[2025-09-29T15:50:59] Fix memory leak in batch generation worker
