@@ -107,3 +107,5 @@ def format_number(n: int) -> str:
 # Fix generator gradient instability during training [2025-09-24T19:02:47]
 
 # Fix memory leak in batch generation worker [2025-09-29T15:50:59]
+
+# Update Faker-based synthetic data generator [2025-09-30T20:00:56]
