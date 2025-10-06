@@ -228,3 +228,5 @@ if __name__ == '__main__':
 # Fix generator gradient instability during training [2025-09-21T14:42:49]
 
 # WIP: benchmarking against SDV library baseline [2025-09-24T10:25:16]
+
+# Add evaluation with FID score metric [2025-10-06T20:43:48]

@@ -283,3 +283,4 @@
 [2025-09-30T20:00:56] Update Faker-based synthetic data generator
 [2025-10-01T10:23:15] Implement latent space interpolation for samples
 [2025-10-01T16:10:01] Add data de-identification pipeline steps
+[2025-10-06T20:43:48] Add evaluation with FID score metric
