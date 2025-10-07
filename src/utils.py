@@ -113,3 +113,5 @@ def format_number(n: int) -> str:
 # Implement latent space interpolation for samples [2025-10-01T10:23:15]
 
 # Add data de-identification pipeline steps [2025-10-01T16:10:01]
+
+# WIP: benchmarking against SDV library baseline [2025-10-07T16:29:24]
