@@ -230,3 +230,5 @@ if __name__ == '__main__':
 # WIP: benchmarking against SDV library baseline [2025-09-24T10:25:16]
 
 # Add evaluation with FID score metric [2025-10-06T20:43:48]
+
+# Implement data quality validation checks [2025-10-09T13:21:35]
