@@ -115,3 +115,5 @@ def format_number(n: int) -> str:
 # Add data de-identification pipeline steps [2025-10-01T16:10:01]
 
 # WIP: benchmarking against SDV library baseline [2025-10-07T16:29:24]
+
+# WIP: debugging mode collapse in generator [2025-10-11T15:31:51]

@@ -286,3 +286,4 @@
 [2025-10-06T20:43:48] Add evaluation with FID score metric
 [2025-10-07T16:29:24] WIP: benchmarking against SDV library baseline
 [2025-10-09T13:21:35] Implement data quality validation checks
+[2025-10-11T15:31:51] WIP: debugging mode collapse in generator
