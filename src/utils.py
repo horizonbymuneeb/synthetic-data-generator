@@ -117,3 +117,5 @@ def format_number(n: int) -> str:
 # WIP: benchmarking against SDV library baseline [2025-10-07T16:29:24]
 
 # WIP: debugging mode collapse in generator [2025-10-11T15:31:51]
+
+# Implement latent space interpolation for samples [2025-10-16T14:00:44]
