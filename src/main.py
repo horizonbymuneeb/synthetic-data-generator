@@ -236,3 +236,5 @@ if __name__ == '__main__':
 # WIP: debugging mode collapse in generator [2025-10-13T10:27:30]
 
 # Fix generator gradient instability during training [2025-10-13T19:37:33]
+
+# Implement differential privacy noise addition [2025-10-16T20:57:12]

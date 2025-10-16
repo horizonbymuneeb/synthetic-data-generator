@@ -289,3 +289,4 @@
 [2025-10-11T15:31:51] WIP: debugging mode collapse in generator
 [2025-10-13T10:27:30] WIP: debugging mode collapse in generator
 [2025-10-13T19:37:33] Fix generator gradient instability during training
+[2025-10-16T20:57:12] Implement differential privacy noise addition
