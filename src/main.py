@@ -238,3 +238,5 @@ if __name__ == '__main__':
 # Fix generator gradient instability during training [2025-10-13T19:37:33]
 
 # Implement differential privacy noise addition [2025-10-16T20:57:12]
+
+# Add evaluation with FID score metric [2025-10-22T19:28:02]
