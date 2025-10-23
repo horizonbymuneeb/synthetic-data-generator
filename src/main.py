@@ -240,3 +240,5 @@ if __name__ == '__main__':
 # Implement differential privacy noise addition [2025-10-16T20:57:12]
 
 # Add evaluation with FID score metric [2025-10-22T19:28:02]
+
+# Implement tabular GAN for synthetic records [2025-10-23T14:55:43]
