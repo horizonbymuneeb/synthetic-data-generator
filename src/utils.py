@@ -125,3 +125,5 @@ def format_number(n: int) -> str:
 # Update training loop with EMA for stability [2025-10-20T19:43:06]
 
 # Implement conditional GAN for labeled data [2025-10-23T19:52:01]
+
+# WIP: training larger models on cloud GPUs [2025-10-28T09:46:28]
