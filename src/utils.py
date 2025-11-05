@@ -131,3 +131,5 @@ def format_number(n: int) -> str:
 # Implement conditional GAN for labeled data [2025-10-29T11:05:32]
 
 # Add evaluation with FID score metric [2025-10-30T12:39:41]
+
+# Update training loop with EMA for stability [2025-11-05T14:28:14]
