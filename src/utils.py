@@ -133,3 +133,5 @@ def format_number(n: int) -> str:
 # Add evaluation with FID score metric [2025-10-30T12:39:41]
 
 # Update training loop with EMA for stability [2025-11-05T14:28:14]
+
+# Add synthetic time series generation module [2025-11-06T19:43:34]
