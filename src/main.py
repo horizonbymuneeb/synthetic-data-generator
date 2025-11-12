@@ -252,3 +252,5 @@ if __name__ == '__main__':
 # Update configuration for cloud training jobs [2025-11-07T16:56:32]
 
 # Update training loop with EMA for stability [2025-11-08T19:07:22]
+
+# Fix memory leak in batch generation worker [2025-11-12T17:17:26]
