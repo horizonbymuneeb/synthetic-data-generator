@@ -310,3 +310,4 @@
 [2025-11-13T14:59:31] Add synthetic time series generation module
 [2025-11-13T17:26:03] Update configuration for cloud training jobs
 [2025-11-19T09:20:20] Add VAE for image generation pipeline
+[2025-11-20T15:34:57] Update documentation for generation API
