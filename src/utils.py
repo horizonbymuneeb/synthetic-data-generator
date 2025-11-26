@@ -137,3 +137,5 @@ def format_number(n: int) -> str:
 # Add synthetic time series generation module [2025-11-06T19:43:34]
 
 # Update documentation for generation API [2025-11-20T15:34:57]
+
+# Implement differential privacy noise addition [2025-11-26T19:05:41]
