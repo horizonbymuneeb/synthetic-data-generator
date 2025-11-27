@@ -312,3 +312,4 @@
 [2025-11-19T09:20:20] Add VAE for image generation pipeline
 [2025-11-20T15:34:57] Update documentation for generation API
 [2025-11-26T19:05:41] Implement differential privacy noise addition
+[2025-11-27T18:34:53] WIP: debugging mode collapse in generator

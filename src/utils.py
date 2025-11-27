@@ -139,3 +139,5 @@ def format_number(n: int) -> str:
 # Update documentation for generation API [2025-11-20T15:34:57]
 
 # Implement differential privacy noise addition [2025-11-26T19:05:41]
+
+# WIP: debugging mode collapse in generator [2025-11-27T18:34:53]
