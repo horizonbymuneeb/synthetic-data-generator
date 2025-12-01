@@ -62,3 +62,9 @@ def generate_copula(frame: pd.DataFrame, config: AppConfig, n_rows: int) -> pd.D
     """Fit and sample the Gaussian copula."""
     model = GaussianCopula(n_bins=config.copula.n_bins).fit(frame)
     return model.sample(n_rows, seed=config.evaluation.seed)
+
+
+def generate_ctgan(frame: pd.DataFrame, config: AppConfig, n_rows: int) -> pd.DataFrame:
+    """Fit and sample CTGAN-lite."""
+    model = CTGANLite(config=to_ctgan_config(config.ctgan)).fit(frame)
+    return model.sample(n_rows, seed=config.evaluation.seed)

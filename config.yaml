@@ -1,0 +1,25 @@
+# Tunables for the whole pipeline. Every value here is read by the code; there
+# are no decorative keys.
+
+generator: copula          # copula | ctgan
+output_dir: artifacts
+
+source:
+  n_rows: 2000             # rows in the synthetic source table
+  seed: 7                  # any change here changes the table, so tests pin it
+
+copula:
+  n_bins: 8                # quantile bins used to condition categoricals on the driver column
+
+ctgan:
+  epochs: 40
+  batch_size: 128
+  learning_rate: 0.002
+  noise_dim: 16
+  hidden_dim: 64
+  max_modes: 3             # modes per continuous column for mode-specific normalisation
+  seed: 0
+
+evaluation:
+  n_synthetic_rows: 2000
+  seed: 11
