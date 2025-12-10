@@ -68,3 +68,11 @@ def generate_ctgan(frame: pd.DataFrame, config: AppConfig, n_rows: int) -> pd.Da
     """Fit and sample CTGAN-lite."""
     model = CTGANLite(config=to_ctgan_config(config.ctgan)).fit(frame)
     return model.sample(n_rows, seed=config.evaluation.seed)
+
+
+def cmd_profile(args: argparse.Namespace, config: AppConfig) -> int:
+    """Print the column profile of the source table."""
+    frame = resolve_source(args, config)
+    profile = profile_frame(frame)
+    print(describe_profile(profile))
+    return 0
