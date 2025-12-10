@@ -264,3 +264,5 @@ if __name__ == '__main__':
 # Add VAE for image generation pipeline [2025-12-01T17:06:30]
 
 # Fix generator gradient instability during training [2025-12-09T15:19:12]
+
+# Add data de-identification pipeline steps [2025-12-10T15:19:52]

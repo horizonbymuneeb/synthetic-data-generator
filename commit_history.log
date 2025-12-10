@@ -315,3 +315,4 @@
 [2025-11-27T18:34:53] WIP: debugging mode collapse in generator
 [2025-12-01T17:06:30] Add VAE for image generation pipeline
 [2025-12-09T15:19:12] Fix generator gradient instability during training
+[2025-12-10T15:19:52] Add data de-identification pipeline steps
