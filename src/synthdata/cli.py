@@ -76,3 +76,47 @@ def cmd_profile(args: argparse.Namespace, config: AppConfig) -> int:
     profile = profile_frame(frame)
     print(describe_profile(profile))
     return 0
+
+
+def cmd_generate(args: argparse.Namespace, config: AppConfig) -> int:
+    """Generate a synthetic table and write it to disk."""
+    frame = resolve_source(args, config)
+    generator = args.generator or config.generator
+    n_rows = args.rows or config.evaluation.n_synthetic_rows
+    synthetic = generate_copula(frame, config, n_rows) if generator == "copula" else generate_ctgan(frame, config, n_rows)
+    output = Path(args.out or DEFAULT_SYNTHETIC_FILE)
+    synthetic.to_csv(output, index=False)
+    print(f"generator={generator} rows={len(synthetic)} columns={len(synthetic.columns)} -> {output}")
+    return 0
+
+
+def cmd_evaluate(args: argparse.Namespace, config: AppConfig) -> int:
+    """Evaluate an existing synthetic table against its source."""
+    real = read_source_csv(args.source)
+    synthetic = read_source_csv(args.synthetic)
+    result = evaluate(real, synthetic)
+    if args.json:
+        print(json.dumps(result.summary(), indent=2))
+    else:
+        print(format_report(result))
+    return 0
+
+
+def cmd_run_all(args: argparse.Namespace, config: AppConfig) -> int:
+    """Run the full pipeline and persist every artefact."""
+    output_dir = Path(config.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    frame = make_source_table(SourceSpec(n_rows=config.source.n_rows, seed=config.source.seed))
+    write_source_csv(frame, str(output_dir / DEFAULT_SOURCE_FILE))
+    print(describe_profile(profile_frame(frame)))
+    for generator, factory in (("copula", generate_copula), ("ctgan", generate_ctgan)):
+        synthetic = factory(frame, config, config.evaluation.n_synthetic_rows)
+        path = output_dir / f"synthetic-{generator}.csv"
+        synthetic.to_csv(path, index=False)
+        result = evaluate(frame, synthetic)
+        print(f"\n[{generator}] -> {path}")
+        print(format_report(result))
+        (output_dir / f"report-{generator}.json").write_text(
+            json.dumps(result.summary(), indent=2), encoding="utf-8"
+        )
+    return 0
