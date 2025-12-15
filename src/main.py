@@ -270,3 +270,5 @@ if __name__ == '__main__':
 # Update configuration for cloud training jobs [2025-12-10T13:38:52]
 
 # Update documentation for generation API [2025-12-15T11:43:21]
+
+# Fix generator gradient instability during training [2025-12-15T14:08:02]
