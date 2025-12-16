@@ -272,3 +272,5 @@ if __name__ == '__main__':
 # Update documentation for generation API [2025-12-15T11:43:21]
 
 # Fix generator gradient instability during training [2025-12-15T14:08:02]
+
+# WIP: training larger models on cloud GPUs [2025-12-16T15:41:20]
