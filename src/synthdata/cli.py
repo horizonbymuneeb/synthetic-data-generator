@@ -120,3 +120,44 @@ def cmd_run_all(args: argparse.Namespace, config: AppConfig) -> int:
             json.dumps(result.summary(), indent=2), encoding="utf-8"
         )
     return 0
+
+
+def cmd_config(args: argparse.Namespace, config: AppConfig) -> int:
+    """Print the effective configuration as JSON."""
+    print(
+        json.dumps(
+            {
+                "generator": config.generator,
+                "output_dir": config.output_dir,
+                "source": config.source.__dict__,
+                "copula": config.copula.__dict__,
+                "ctgan": config.ctgan.__dict__,
+                "evaluation": config.evaluation.__dict__,
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Parse arguments, load config, dispatch the command."""
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    try:
+        config = load_config(args.config)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"config error: {exc}", file=sys.stderr)
+        return 2
+    handlers = {
+        "profile": cmd_profile,
+        "generate": cmd_generate,
+        "evaluate": cmd_evaluate,
+        "run-all": cmd_run_all,
+        "config": cmd_config,
+    }
+    return handlers[args.command](args, config)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
