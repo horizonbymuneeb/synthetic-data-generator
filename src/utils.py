@@ -141,3 +141,5 @@ def format_number(n: int) -> str:
 # Implement differential privacy noise addition [2025-11-26T19:05:41]
 
 # WIP: debugging mode collapse in generator [2025-11-27T18:34:53]
+
+# Implement domain adaptation for transfer [2025-12-17T15:11:44]
