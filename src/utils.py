@@ -143,3 +143,5 @@ def format_number(n: int) -> str:
 # WIP: debugging mode collapse in generator [2025-11-27T18:34:53]
 
 # Implement domain adaptation for transfer [2025-12-17T15:11:44]
+
+# Update documentation for generation API [2025-12-26T13:04:15]
