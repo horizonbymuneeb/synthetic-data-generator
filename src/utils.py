@@ -145,3 +145,5 @@ def format_number(n: int) -> str:
 # Implement domain adaptation for transfer [2025-12-17T15:11:44]
 
 # Update documentation for generation API [2025-12-26T13:04:15]
+
+# Add data de-identification pipeline steps [2025-12-30T15:43:30]
