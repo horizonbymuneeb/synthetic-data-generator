@@ -274,3 +274,5 @@ if __name__ == '__main__':
 # Fix generator gradient instability during training [2025-12-15T14:08:02]
 
 # WIP: training larger models on cloud GPUs [2025-12-16T15:41:20]
+
+# Add data de-identification pipeline steps [2025-12-31T12:59:50]
