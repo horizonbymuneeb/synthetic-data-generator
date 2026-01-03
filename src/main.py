@@ -276,3 +276,5 @@ if __name__ == '__main__':
 # WIP: training larger models on cloud GPUs [2025-12-16T15:41:20]
 
 # Add data de-identification pipeline steps [2025-12-31T12:59:50]
+
+# WIP: benchmarking against SDV library baseline [2026-01-03T12:58:04]
