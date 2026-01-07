@@ -278,3 +278,5 @@ if __name__ == '__main__':
 # Add data de-identification pipeline steps [2025-12-31T12:59:50]
 
 # WIP: benchmarking against SDV library baseline [2026-01-03T12:58:04]
+
+# WIP: debugging mode collapse in generator [2026-01-07T19:07:52]
