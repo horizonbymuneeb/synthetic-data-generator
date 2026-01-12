@@ -149,3 +149,5 @@ def format_number(n: int) -> str:
 # Add data de-identification pipeline steps [2025-12-30T15:43:30]
 
 # Implement latent space interpolation for samples [2026-01-05T13:49:03]
+
+# Implement conditional GAN for labeled data [2026-01-12T16:34:47]
