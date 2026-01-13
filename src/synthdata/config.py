@@ -88,3 +88,43 @@ class AppConfig:
     def __post_init__(self) -> None:
         if self.generator not in ALLOWED_GENERATORS:
             raise ValueError(f"generator must be one of {ALLOWED_GENERATORS}, got {self.generator!r}")
+
+
+def _section(raw: dict[str, Any], key: str) -> dict[str, Any]:
+    value = raw.get(key, {})
+    if not isinstance(value, dict):
+        raise ValueError(f"config section {key!r} must be a mapping, got {type(value).__name__}")
+    return value
+
+
+def _build(cls: type, values: dict[str, Any], section: str) -> Any:
+    known = set(cls.__dataclass_fields__)
+    unknown = sorted(set(values) - known)
+    if unknown:
+        raise ValueError(f"unknown keys in {section}: {unknown}")
+    try:
+        return cls(**values)
+    except TypeError as exc:
+        raise ValueError(f"bad value in {section}: {exc}") from exc
+
+
+def load_config(path: str | Path | None = None) -> AppConfig:
+    """Read ``config.yaml`` and return a validated :class:`AppConfig`."""
+    resolved = Path(path) if path is not None else DEFAULT_CONFIG_PATH
+    if not resolved.exists():
+        raise FileNotFoundError(f"config file not found: {resolved}")
+    raw = yaml.safe_load(resolved.read_text(encoding="utf-8")) or {}
+    if not isinstance(raw, dict):
+        raise ValueError("config file must contain a mapping at the top level")
+    generator = raw.get("generator", "copula")
+    output_dir = raw.get("output_dir", "artifacts")
+    if not isinstance(output_dir, str) or not output_dir:
+        raise ValueError("output_dir must be a non-empty string")
+    return AppConfig(
+        source=_build(SourceConfig, _section(raw, "source"), "source"),
+        copula=_build(CopulaConfig, _section(raw, "copula"), "copula"),
+        ctgan=_build(CTGANOptions, _section(raw, "ctgan"), "ctgan"),
+        evaluation=_build(EvalConfig, _section(raw, "evaluation"), "evaluation"),
+        generator=str(generator),
+        output_dir=output_dir,
+    )
