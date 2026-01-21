@@ -59,3 +59,32 @@ def test_source_table_respects_its_declared_bounds() -> None:
     assert set(frame["city"].unique()) <= set(CITY_LEVELS)
     assert set(frame["plan"].unique()) <= set(PLAN_LEVELS)
     assert set(frame["churned"].unique()) == {"no", "yes"}
+
+
+def test_source_table_has_a_plausible_churn_rate_and_dependency() -> None:
+    frame = make_source_table(SourceSpec(n_rows=3000, seed=12))
+    rate = (frame["churned"] == "yes").mean()
+    assert 0.05 < rate < 0.75
+    mean_tenure_churned = frame.loc[frame["churned"] == "yes", "tenure_months"].mean()
+    mean_tenure_kept = frame.loc[frame["churned"] == "no", "tenure_months"].mean()
+    assert mean_tenure_churned < mean_tenure_kept
+
+
+def test_source_spec_validation() -> None:
+    with pytest.raises(ValueError, match="n_rows"):
+        SourceSpec(n_rows=5)
+    with pytest.raises(ValueError, match="3x3"):
+        SourceSpec(latent_correlation=((1.0, 0.0), (0.0, 1.0)))
+    with pytest.raises(ValueError, match="diagonal"):
+        SourceSpec(latent_correlation=((2.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)))
+
+
+def test_csv_roundtrip_preserves_values(tmp_path: Path) -> None:
+    frame = make_source_table(SourceSpec(n_rows=40, seed=2))
+    path = tmp_path / "source.csv"
+    write_source_csv(frame, str(path))
+    assert path.exists()
+    restored = read_source_csv(str(path))
+    assert list(restored.columns) == list(frame.columns)
+    assert restored["age"].tolist() == frame["age"].tolist()
+    assert pd.api.types.is_datetime64_any_dtype(restored["signup_date"])

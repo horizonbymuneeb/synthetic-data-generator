@@ -128,3 +128,41 @@ def load_config(path: str | Path | None = None) -> AppConfig:
         generator=str(generator),
         output_dir=output_dir,
     )
+
+
+def to_ctgan_config(options: CTGANOptions):
+    """Adapt the YAML block to the dataclass the trainer expects."""
+    from .ctgan import CTGANConfig
+
+    return CTGANConfig(
+        epochs=options.epochs,
+        batch_size=options.batch_size,
+        learning_rate=options.learning_rate,
+        noise_dim=options.noise_dim,
+        hidden_dim=options.hidden_dim,
+        max_modes=options.max_modes,
+        seed=options.seed,
+    )
+
+
+def default_config_yaml() -> str:
+    """Serialise the built-in defaults, used by the ``config`` CLI command."""
+    return yaml.safe_dump(
+        {
+            "generator": "copula",
+            "output_dir": "artifacts",
+            "source": {"n_rows": 2000, "seed": 7},
+            "copula": {"n_bins": 8},
+            "ctgan": {
+                "epochs": 40,
+                "batch_size": 128,
+                "learning_rate": 0.002,
+                "noise_dim": 16,
+                "hidden_dim": 64,
+                "max_modes": 3,
+                "seed": 0,
+            },
+            "evaluation": {"n_synthetic_rows": 2000, "seed": 11},
+        },
+        sort_keys=False,
+    )
