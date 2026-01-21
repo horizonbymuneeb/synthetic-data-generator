@@ -333,3 +333,4 @@
 [2026-01-14T11:24:29] Implement tabular GAN for synthetic records
 [2026-01-15T19:14:24] Add synthetic time series generation module
 [2026-01-21T11:16:11] Add data de-identification pipeline steps
+[2026-01-21T18:10:49] Update documentation for generation API
