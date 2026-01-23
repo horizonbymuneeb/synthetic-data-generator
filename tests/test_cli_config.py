@@ -88,3 +88,28 @@ def test_csv_roundtrip_preserves_values(tmp_path: Path) -> None:
     assert list(restored.columns) == list(frame.columns)
     assert restored["age"].tolist() == frame["age"].tolist()
     assert pd.api.types.is_datetime64_any_dtype(restored["signup_date"])
+
+
+def test_load_config_reads_the_repository_config() -> None:
+    config = load_config("config.yaml")
+    assert isinstance(config, AppConfig)
+    assert config.generator in {"copula", "ctgan"}
+    assert config.source.n_rows >= 10
+    assert config.copula.n_bins >= 2
+    assert config.evaluation.n_synthetic_rows >= 10
+
+
+def test_load_config_rejects_unknown_keys(tmp_path: Path) -> None:
+    path = tmp_path / "bad.yaml"
+    path.write_text("source:\n  n_rows: 50\n  n_rows_typo: 3\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="unknown keys in source"):
+        load_config(path)
+
+
+def test_load_config_rejects_bad_values_and_missing_files(tmp_path: Path) -> None:
+    path = tmp_path / "bad.yaml"
+    path.write_text("generator: copula\nsource:\n  n_rows: 3\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="n_rows"):
+        load_config(path)
+    with pytest.raises(FileNotFoundError):
+        load_config(tmp_path / "nope.yaml")

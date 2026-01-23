@@ -17,3 +17,16 @@ values co-occur* and *what the marginal distribution of each column is*.
    the first numeric column, binned by quantile, so ``plan`` stays correlated
    with income after the synthetic rows are generated.
 """
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+import numpy as np
+import pandas as pd
+from scipy import stats
+
+from .profile import DatasetProfile, profile_frame
+
+DEFAULT_BINS: int = 8
+CORRELATION_EPS: float = 1e-6
