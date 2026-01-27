@@ -113,3 +113,31 @@ def test_load_config_rejects_bad_values_and_missing_files(tmp_path: Path) -> Non
         load_config(path)
     with pytest.raises(FileNotFoundError):
         load_config(tmp_path / "nope.yaml")
+
+
+def test_config_validation_guards() -> None:
+    with pytest.raises(ValueError, match="generator"):
+        AppConfig(generator="magic")
+    with pytest.raises(ValueError, match="epochs"):
+        CTGANOptions(epochs=0)
+    with pytest.raises(ValueError, match="n_rows"):
+        SourceConfig(n_rows=1)
+
+
+def test_to_ctgan_config_maps_every_field() -> None:
+    options = CTGANOptions(epochs=3, batch_size=32, noise_dim=8, hidden_dim=16, max_modes=2, seed=5)
+    config = to_ctgan_config(options)
+    assert config.epochs == 3
+    assert config.batch_size == 32
+    assert config.noise_dim == 8
+    assert config.hidden_dim == 16
+    assert config.max_modes == 2
+    assert config.seed == 5
+
+
+def test_default_config_yaml_roundtrips_through_the_loader(tmp_path: Path) -> None:
+    path = tmp_path / "default.yaml"
+    path.write_text(default_config_yaml(), encoding="utf-8")
+    config = load_config(path)
+    assert config.generator == "copula"
+    assert config.ctgan.epochs == 40
