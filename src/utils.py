@@ -157,3 +157,5 @@ def format_number(n: int) -> str:
 # Add data de-identification pipeline steps [2026-01-21T11:16:11]
 
 # Add evaluation with FID score metric [2026-01-23T10:09:44]
+
+# Add VAE for image generation pipeline [2026-01-27T13:31:25]
