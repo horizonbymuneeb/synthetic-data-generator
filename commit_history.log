@@ -336,3 +336,4 @@
 [2026-01-21T18:10:49] Update documentation for generation API
 [2026-01-23T10:09:44] Add evaluation with FID score metric
 [2026-01-27T13:31:25] Add VAE for image generation pipeline
+[2026-01-27T12:53:00] Add VAE for image generation pipeline
