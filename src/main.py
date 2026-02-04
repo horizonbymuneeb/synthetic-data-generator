@@ -292,3 +292,5 @@ if __name__ == '__main__':
 # Add VAE for image generation pipeline [2026-01-29T09:38:39]
 
 # Implement tabular GAN for synthetic records [2026-02-04T20:48:02]
+
+# Add evaluation with FID score metric [2026-02-04T11:48:23]
