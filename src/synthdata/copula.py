@@ -120,3 +120,44 @@ class GaussianCopula:
         if column not in self.sorted_marginals:
             raise KeyError(f"column {column!r} was not fitted")
         return np.quantile(self.sorted_marginals[column], quantiles)
+
+
+def rank_normalise(values: np.ndarray) -> np.ndarray:
+    """Map values to normal scores through the empirical CDF.
+
+    Ties receive their average rank, and the (i - 0.5) / n correction keeps the
+    scores away from the infinite tails of the normal distribution.
+    """
+    array = np.asarray(values, dtype=float)
+    if array.ndim != 1:
+        raise ValueError("rank_normalise expects a 1-D array")
+    if array.size == 0:
+        raise ValueError("rank_normalise expects a non-empty array")
+    if not np.all(np.isfinite(array)):
+        raise ValueError("rank_normalise cannot handle NaN or inf")
+    ranks = stats.rankdata(array, method="average")
+    probabilities = (ranks - 0.5) / array.size
+    return stats.norm.ppf(probabilities)
+
+
+def inverse_rank_transform(scores: np.ndarray, sorted_reference: np.ndarray) -> np.ndarray:
+    """Push normal scores back through an empirical quantile function."""
+    scores = np.asarray(scores, dtype=float)
+    reference = np.sort(np.asarray(sorted_reference, dtype=float))
+    if reference.size == 0:
+        raise ValueError("sorted_reference must not be empty")
+    probabilities = np.clip(stats.norm.cdf(scores), 0.0, 1.0)
+    return np.quantile(reference, probabilities, method="linear")
+
+
+def fit_correlation(scores: np.ndarray) -> np.ndarray:
+    """Pearson correlation of the normal scores, with unit diagonal."""
+    matrix = np.asarray(scores, dtype=float)
+    if matrix.ndim != 2:
+        raise ValueError("scores must be a 2-D array")
+    if matrix.shape[0] < 2:
+        raise ValueError("need at least two rows to fit a correlation")
+    correlation = np.corrcoef(matrix, rowvar=False)
+    correlation = np.atleast_2d(correlation)
+    np.fill_diagonal(correlation, 1.0)
+    return correlation

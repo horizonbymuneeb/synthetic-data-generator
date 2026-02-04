@@ -141,3 +141,28 @@ def test_default_config_yaml_roundtrips_through_the_loader(tmp_path: Path) -> No
     config = load_config(path)
     assert config.generator == "copula"
     assert config.ctgan.epochs == 40
+
+
+def test_cli_parser_exposes_the_five_commands() -> None:
+    parser = build_parser()
+    for command in ("profile", "generate", "evaluate", "run-all", "config"):
+        parsed = parser.parse_args([command])
+        assert parsed.command == command
+    assert parser.parse_args(["generate", "--generator", "ctgan"]).generator == "ctgan"
+
+
+def test_cli_profile_and_config_commands(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["profile"]) == 0
+    profile_output = capsys.readouterr().out
+    assert "rows" in profile_output and "income" in profile_output
+    assert main(["config"]) == 0
+    assert '"generator"' in capsys.readouterr().out
+
+
+def test_cli_generate_writes_a_table(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    out = tmp_path / "synthetic.csv"
+    code = main(["generate", "--generator", "copula", "--rows", "60", "--out", str(out)])
+    assert code == 0
+    assert out.exists()
+    assert "generator=copula" in capsys.readouterr().out
+    assert len(pd.read_csv(out)) == 60
