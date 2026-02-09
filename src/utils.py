@@ -161,3 +161,5 @@ def format_number(n: int) -> str:
 # Add VAE for image generation pipeline [2026-01-27T13:31:25]
 
 # Add VAE for image generation pipeline [2026-01-27T12:53:00]
+
+# Fix generator gradient instability during training [2026-02-09T13:40:31]
