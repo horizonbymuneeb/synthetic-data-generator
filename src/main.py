@@ -294,3 +294,5 @@ if __name__ == '__main__':
 # Implement tabular GAN for synthetic records [2026-02-04T20:48:02]
 
 # Add evaluation with FID score metric [2026-02-04T11:48:23]
+
+# Implement conditional GAN for labeled data [2026-02-11T11:25:23]
