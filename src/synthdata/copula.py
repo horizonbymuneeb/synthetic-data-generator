@@ -161,3 +161,58 @@ def fit_correlation(scores: np.ndarray) -> np.ndarray:
     correlation = np.atleast_2d(correlation)
     np.fill_diagonal(correlation, 1.0)
     return correlation
+
+
+def repair_correlation(correlation: np.ndarray, eps: float = CORRELATION_EPS) -> np.ndarray:
+    """Clip negative eigenvalues so the matrix can be used as a covariance.
+
+    Sampling from a matrix that is only *almost* positive semi-definite raises
+    or silently produces complex values once it is factorised. Clipping the
+    spectrum and re-normalising the diagonal keeps the fitted correlations as
+    close as possible while making the matrix valid.
+    """
+    matrix = np.asarray(correlation, dtype=float)
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError("correlation matrix must be square")
+    matrix = (matrix + matrix.T) / 2.0
+    eigenvalues, eigenvectors = np.linalg.eigh(matrix)
+    clipped = np.clip(eigenvalues, eps, None)
+    repaired = eigenvectors @ np.diag(clipped) @ eigenvectors.T
+    scale = np.sqrt(np.clip(np.diag(repaired), eps, None))
+    repaired = repaired / np.outer(scale, scale)
+    np.fill_diagonal(repaired, 1.0)
+    return repaired
+
+
+def sample_latent(correlation: np.ndarray, n_rows: int, seed: int = 0) -> np.ndarray:
+    """Draw correlated standard normals from a repaired correlation matrix."""
+    if n_rows <= 0:
+        raise ValueError(f"n_rows must be positive, got {n_rows}")
+    corr = repair_correlation(correlation)
+    eigenvalues, eigenvectors = np.linalg.eigh(corr)
+    factor = eigenvectors @ np.diag(np.sqrt(np.clip(eigenvalues, 0.0, None)))
+    rng = np.random.default_rng(seed)
+    standard = rng.standard_normal((n_rows, corr.shape[0]))
+    return standard @ factor.T
+
+
+def fit_conditional(series: pd.Series, driver: np.ndarray, n_bins: int = DEFAULT_BINS) -> ConditionalCategorical:
+    """Tabulate ``P(level | driver bin)`` with Laplace smoothing."""
+    observed = series.notna().to_numpy()
+    levels = tuple(sorted(series.dropna().astype(str).unique()))
+    if not levels:
+        raise ValueError(f"column {series.name!r} has no observed levels")
+    if n_bins < 2:
+        raise ValueError(f"n_bins must be >= 2, got {n_bins}")
+    edges = np.unique(np.quantile(driver[observed], np.linspace(0, 1, n_bins + 1)))
+    if edges.size < 3:
+        edges = np.asarray([driver.min() - 1.0, driver.mean(), driver.max() + 1.0])
+    bin_index = np.clip(np.digitize(driver, edges[1:-1]), 0, len(edges) - 2)
+    n_levels = len(levels)
+    counts = np.ones((len(edges) - 1, n_levels), dtype=float)
+    lookup = {level: position for position, level in enumerate(levels)}
+    for row in np.flatnonzero(observed):
+        level = str(series.iloc[row])
+        counts[bin_index[row], lookup[level]] += 1.0
+    probabilities = counts / counts.sum(axis=1, keepdims=True)
+    return ConditionalCategorical(levels=levels, bin_edges=edges, probabilities=probabilities)

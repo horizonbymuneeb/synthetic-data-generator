@@ -166,3 +166,18 @@ def test_cli_generate_writes_a_table(tmp_path: Path, capsys: pytest.CaptureFixtu
     assert out.exists()
     assert "generator=copula" in capsys.readouterr().out
     assert len(pd.read_csv(out)) == 60
+
+
+def test_cli_reports_a_config_error_with_exit_code_two(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    bad = tmp_path / "bad.yaml"
+    bad.write_text("generator: nope\n", encoding="utf-8")
+    assert main(["--config", str(bad), "config"]) == 2
+    assert "config error" in capsys.readouterr().err
+
+
+def test_generate_copula_helper_matches_the_requested_row_count() -> None:
+    frame = make_source_table(SourceSpec(n_rows=80, seed=4))
+    config = AppConfig()
+    synthetic = generate_copula(frame, config, 25)
+    assert len(synthetic) == 25
+    assert set(synthetic.columns) == set(frame.columns)
