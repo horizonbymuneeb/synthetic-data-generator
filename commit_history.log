@@ -342,3 +342,4 @@
 [2026-02-04T11:48:23] Add evaluation with FID score metric
 [2026-02-09T13:40:31] Fix generator gradient instability during training
 [2026-02-11T11:25:23] Implement conditional GAN for labeled data
+[2026-02-12T14:25:13] Update Faker-based synthetic data generator
