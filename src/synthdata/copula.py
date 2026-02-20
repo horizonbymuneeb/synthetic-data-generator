@@ -216,3 +216,8 @@ def fit_conditional(series: pd.Series, driver: np.ndarray, n_bins: int = DEFAULT
         counts[bin_index[row], lookup[level]] += 1.0
     probabilities = counts / counts.sum(axis=1, keepdims=True)
     return ConditionalCategorical(levels=levels, bin_edges=edges, probabilities=probabilities)
+
+
+def fit(frame: pd.DataFrame, n_bins: int = DEFAULT_BINS) -> GaussianCopula:
+    """Convenience wrapper: build and fit a copula in one call."""
+    return GaussianCopula(n_bins=n_bins).fit(frame)
