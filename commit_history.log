@@ -345,3 +345,4 @@
 [2026-02-12T14:25:13] Update Faker-based synthetic data generator
 [2026-02-20T12:38:56] Add data de-identification pipeline steps
 [2026-02-20T10:41:46] Implement differential privacy noise addition
+[2026-02-23T13:09:26] Fix generator gradient instability during training
