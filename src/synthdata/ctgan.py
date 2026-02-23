@@ -29,3 +29,7 @@ import torch
 from torch import nn
 
 from .profile import ColumnKind, DatasetProfile, profile_frame
+
+DEFAULT_NOISE_DIM: int = 16
+DEFAULT_HIDDEN_DIM: int = 64
+DEFAULT_EPOCHS: int = 40
