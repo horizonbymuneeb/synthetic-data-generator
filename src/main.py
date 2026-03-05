@@ -304,3 +304,5 @@ if __name__ == '__main__':
 # Implement differential privacy noise addition [2026-02-20T10:41:46]
 
 # Fix memory leak in batch generation worker [2026-03-05T09:27:35]
+
+# Add data de-identification pipeline steps [2026-03-05T18:47:05]
