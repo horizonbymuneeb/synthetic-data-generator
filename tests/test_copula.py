@@ -74,3 +74,25 @@ def test_fit_correlation_has_unit_diagonal_and_symmetric_entries() -> None:
     assert correlation.shape == (3, 3)
     assert np.allclose(np.diag(correlation), 1.0)
     assert np.allclose(correlation, correlation.T)
+
+
+def test_repair_correlation_makes_an_invalid_matrix_positive_semidefinite() -> None:
+    broken = np.asarray([[1.0, 0.9, -0.9], [0.9, 1.0, 0.9], [-0.9, 0.9, 1.0]])
+    assert np.linalg.eigvalsh(broken).min() < 0
+    repaired = repair_correlation(broken)
+    assert np.linalg.eigvalsh(repaired).min() > -1e-8
+    assert np.allclose(np.diag(repaired), 1.0)
+    assert np.allclose(repaired, repaired.T)
+
+
+def test_repair_correlation_rejects_non_square_input() -> None:
+    with pytest.raises(ValueError, match="square"):
+        repair_correlation(np.zeros((2, 3)))
+
+
+def test_sample_latent_has_the_requested_correlation() -> None:
+    correlation = np.asarray([[1.0, 0.6], [0.6, 1.0]])
+    sample = sample_latent(correlation, 20_000, seed=4)
+    assert sample.shape == (20_000, 2)
+    empirical = np.corrcoef(sample, rowvar=False)[0, 1]
+    assert empirical == pytest.approx(0.6, abs=0.03)

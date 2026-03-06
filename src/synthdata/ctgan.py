@@ -145,3 +145,61 @@ class CategoricalEncoder:
         matrix = np.zeros((n_rows, self.width), dtype=float)
         matrix[np.arange(n_rows), indices] = 1.0
         return matrix
+
+
+class Generator(nn.Module):
+    """Maps (noise, conditional vector) to normalised row values."""
+
+    def __init__(self, noise_dim: int, cond_dim: int, data_dim: int, hidden_dim: int = DEFAULT_HIDDEN_DIM) -> None:
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(noise_dim + cond_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, data_dim),
+            nn.Tanh(),
+        )
+
+    def forward(self, noise: torch.Tensor, condition: torch.Tensor) -> torch.Tensor:
+        return self.net(torch.cat([noise, condition], dim=1))
+
+
+class Discriminator(nn.Module):
+    """Scores a row as real or synthetic, given its conditioning block."""
+
+    def __init__(self, data_dim: int, cond_dim: int, hidden_dim: int = DEFAULT_HIDDEN_DIM) -> None:
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(data_dim + cond_dim, hidden_dim),
+            nn.LeakyReLU(0.2),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.LeakyReLU(0.2),
+            nn.Linear(hidden_dim, 1),
+        )
+
+    def forward(self, rows: torch.Tensor, condition: torch.Tensor) -> torch.Tensor:
+        return self.net(torch.cat([rows, condition], dim=1))
+
+
+@dataclass
+class CTGANConfig:
+    """Tunables for :class:`CTGANLite`; mirrors the ``ctgan`` block of config.yaml."""
+
+    epochs: int = DEFAULT_EPOCHS
+    batch_size: int = DEFAULT_BATCH_SIZE
+    learning_rate: float = DEFAULT_LEARNING_RATE
+    noise_dim: int = DEFAULT_NOISE_DIM
+    hidden_dim: int = DEFAULT_HIDDEN_DIM
+    max_modes: int = MAX_MODES
+    seed: int = 0
+
+    def __post_init__(self) -> None:
+        if self.epochs < 1:
+            raise ValueError(f"epochs must be >= 1, got {self.epochs}")
+        if self.batch_size < 2:
+            raise ValueError(f"batch_size must be >= 2, got {self.batch_size}")
+        if not 0 < self.learning_rate < 1:
+            raise ValueError(f"learning_rate must be in (0, 1), got {self.learning_rate}")
+        if self.noise_dim < 1 or self.hidden_dim < 2:
+            raise ValueError("noise_dim must be >= 1 and hidden_dim >= 2")
