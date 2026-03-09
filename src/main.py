@@ -308,3 +308,5 @@ if __name__ == '__main__':
 # Add data de-identification pipeline steps [2026-03-05T18:47:05]
 
 # WIP: debugging mode collapse in generator [2026-03-05T16:57:06]
+
+# Add support for long tail distributions [2026-03-09T09:19:41]

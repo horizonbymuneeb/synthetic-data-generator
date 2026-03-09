@@ -353,3 +353,4 @@
 [2026-03-05T18:47:05] Add data de-identification pipeline steps
 [2026-03-05T16:57:06] WIP: debugging mode collapse in generator
 [2026-03-06T09:15:49] Add synthetic time series generation module
+[2026-03-09T09:19:41] Add support for long tail distributions
