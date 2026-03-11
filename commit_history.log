@@ -356,3 +356,4 @@
 [2026-03-09T09:19:41] Add support for long tail distributions
 [2026-03-10T17:11:56] Add evaluation with FID score metric
 [2026-03-11T20:34:34] Update configuration for cloud training jobs
+[2026-03-11T14:33:24] Add synthetic time series generation module
