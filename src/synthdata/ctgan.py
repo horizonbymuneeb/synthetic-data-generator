@@ -203,3 +203,168 @@ class CTGANConfig:
             raise ValueError(f"learning_rate must be in (0, 1), got {self.learning_rate}")
         if self.noise_dim < 1 or self.hidden_dim < 2:
             raise ValueError("noise_dim must be >= 1 and hidden_dim >= 2")
+
+
+@dataclass
+class CTGANLite:
+    """Conditional tabular GAN with mode-specific normalisation."""
+
+    config: CTGANConfig = field(default_factory=CTGANConfig)
+    normalizers: dict[str, ModeSpecificNormalizer] = field(default_factory=dict)
+    encoders: dict[str, CategoricalEncoder] = field(default_factory=dict)
+    numeric_columns: list[str] = field(default_factory=list)
+    categorical_columns: list[str] = field(default_factory=list)
+    datetime_columns: list[str] = field(default_factory=list)
+    datetime_levels: dict[str, np.ndarray] = field(default_factory=dict)
+    datetime_weights: dict[str, np.ndarray] = field(default_factory=dict)
+    integer_columns: set[str] = field(default_factory=set)
+    generator: Generator | None = None
+    discriminator: Discriminator | None = None
+    loss_history: list[float] = field(default_factory=list)
+    level_probabilities: dict[str, np.ndarray] = field(default_factory=dict)
+
+    @property
+    def condition_dim(self) -> int:
+        return sum(encoder.width for encoder in self.encoders.values())
+
+    @property
+    def data_dim(self) -> int:
+        return len(self.numeric_columns)
+
+    def _build_condition(self, frame: pd.DataFrame) -> np.ndarray:
+        blocks = [self.encoders[column].transform(frame[column]) for column in self.categorical_columns]
+        if not blocks:
+            return np.zeros((len(frame), 0), dtype=float)
+        return np.hstack(blocks)
+
+    def _transform_numeric(self, frame: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+        columns = []
+        modes = []
+        for column in self.numeric_columns:
+            normalised, mode_index = self.normalizers[column].transform(frame[column].to_numpy(dtype=float))
+            columns.append(normalised)
+            modes.append(mode_index)
+        if not columns:
+            return np.zeros((len(frame), 0), dtype=float), np.zeros((len(frame), 0), dtype=int)
+        return np.column_stack(columns), np.column_stack(modes)
+
+    def fit(self, frame: pd.DataFrame, profile: DatasetProfile | None = None) -> "CTGANLite":
+        """Fit the preprocessors, then run the adversarial loop."""
+        profile = profile or profile_frame(frame)
+        self.numeric_columns = profile.numeric_columns
+        self.categorical_columns = profile.categorical_columns
+        if not self.numeric_columns:
+            raise ValueError("CTGAN-lite needs at least one numeric column")
+        self.integer_columns = {
+            column
+            for column in self.numeric_columns
+            if np.allclose(frame[column].dropna().to_numpy(dtype=float) % 1, 0.0)
+        }
+        self.normalizers = {
+            column: ModeSpecificNormalizer(name=column).fit(
+                frame[column].to_numpy(dtype=float), self.config.max_modes
+            )
+            for column in self.numeric_columns
+        }
+        self.encoders = {column: CategoricalEncoder().fit(frame[column]) for column in self.categorical_columns}
+        self.level_probabilities = {
+            column: np.bincount(
+                self.encoders[column].transform(frame[column]).argmax(axis=1),
+                minlength=self.encoders[column].width,
+            ).astype(float)
+            for column in self.categorical_columns
+        }
+        self.datetime_columns = profile.datetime_columns
+        for column in self.datetime_columns:
+            observed = frame[column].dropna()
+            counts = observed.value_counts().sort_index()
+            self.datetime_levels[column] = counts.index.to_numpy()
+            self.datetime_weights[column] = counts.to_numpy(dtype=float) / counts.to_numpy().sum()
+        values, _ = self._transform_numeric(frame)
+        # The generator ends in tanh, so training rows must live inside [-1, 1].
+        values = np.clip(values, -TRAINING_CLIP, TRAINING_CLIP)
+        condition = self._build_condition(frame)
+        self._train(values, condition)
+        return self
+
+    def _train(self, values: np.ndarray, condition: np.ndarray) -> None:
+        torch.manual_seed(self.config.seed)
+        rows = torch.as_tensor(values, dtype=torch.float32)
+        cond = torch.as_tensor(condition, dtype=torch.float32)
+        self.generator = Generator(self.config.noise_dim, cond.shape[1], values.shape[1], self.config.hidden_dim)
+        self.discriminator = Discriminator(values.shape[1], cond.shape[1], self.config.hidden_dim)
+        optimizer_g = torch.optim.Adam(self.generator.parameters(), lr=self.config.learning_rate)
+        optimizer_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.config.learning_rate)
+        loss_fn = nn.BCEWithLogitsLoss()
+        n_rows = rows.shape[0]
+        batch_size = min(self.config.batch_size, n_rows)
+        generator = self.generator
+        discriminator = self.discriminator
+        self.loss_history = []
+        for _ in range(self.config.epochs):
+            permutation = torch.randperm(n_rows)
+            epoch_loss = 0.0
+            n_batches = 0
+            for start in range(0, n_rows - batch_size + 1, batch_size):
+                index = permutation[start : start + batch_size]
+                real_rows = rows[index]
+                real_cond = cond[index]
+                noise = torch.randn(index.shape[0], self.config.noise_dim)
+                fake_rows = generator(noise, real_cond).detach()
+                optimizer_d.zero_grad()
+                real_logits = discriminator(real_rows, real_cond)
+                fake_logits = discriminator(fake_rows, real_cond)
+                loss_d = loss_fn(real_logits, torch.ones_like(real_logits)) + loss_fn(
+                    fake_logits, torch.zeros_like(fake_logits)
+                )
+                loss_d.backward()
+                optimizer_d.step()
+                optimizer_g.zero_grad()
+                noise = torch.randn(index.shape[0], self.config.noise_dim)
+                generated = generator(noise, real_cond)
+                logits = discriminator(generated, real_cond)
+                loss_g = loss_fn(logits, torch.ones_like(logits))
+                loss_g.backward()
+                optimizer_g.step()
+                epoch_loss += float(loss_g.item())
+                n_batches += 1
+            self.loss_history.append(epoch_loss / max(n_batches, 1))
+
+    def sample(self, n_rows: int, seed: int = 0) -> pd.DataFrame:
+        """Generate rows by conditioning on categorical levels drawn from the data."""
+        if self.generator is None:
+            raise ValueError("call fit() before sample()")
+        if n_rows <= 0:
+            raise ValueError(f"n_rows must be positive, got {n_rows}")
+        rng = np.random.default_rng(seed)
+        condition_blocks = []
+        for column in self.categorical_columns:
+            encoder = self.encoders[column]
+            condition_blocks.append(encoder.sample_one_hot(n_rows, self.level_probabilities[column], int(rng.integers(2**31))))
+        condition = np.hstack(condition_blocks) if condition_blocks else np.zeros((n_rows, 0), dtype=float)
+        torch_generator = torch.Generator().manual_seed(int(seed))
+        with torch.no_grad():
+            noise = torch.randn(n_rows, self.config.noise_dim, generator=torch_generator)
+            generated = self.generator(noise, torch.as_tensor(condition, dtype=torch.float32)).numpy()
+        data: dict[str, np.ndarray] = {}
+        for position, column in enumerate(self.numeric_columns):
+            normalizer = self.normalizers[column]
+            # The mode index is part of the conditional vector at training time;
+            # at sampling time it is drawn from the fitted mode weights.
+            weights = normalizer.weights / normalizer.weights.sum()
+            modes = rng.choice(normalizer.n_modes, size=n_rows, p=weights)
+            values = normalizer.inverse_transform(generated[:, position], modes)
+            if column in self.integer_columns:
+                values = np.rint(values)
+            data[column] = values
+        for column in self.datetime_columns:
+            levels = self.datetime_levels[column]
+            index = rng.choice(len(levels), size=n_rows, p=self.datetime_weights[column])
+            data[column] = levels[index]
+        offset = 0
+        for column in self.categorical_columns:
+            encoder = self.encoders[column]
+            block = condition[:, offset : offset + encoder.width]
+            data[column] = encoder.inverse_transform(block)
+            offset += encoder.width
+        return pd.DataFrame(data)

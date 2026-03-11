@@ -96,3 +96,33 @@ def test_sample_latent_has_the_requested_correlation() -> None:
     assert sample.shape == (20_000, 2)
     empirical = np.corrcoef(sample, rowvar=False)[0, 1]
     assert empirical == pytest.approx(0.6, abs=0.03)
+
+
+def test_copula_sample_matches_shapes_and_column_ranges(source: pd.DataFrame) -> None:
+    model = GaussianCopula(n_bins=6).fit(source)
+    synthetic = model.sample(300, seed=2)
+    assert synthetic.shape == (300, len(source.columns))
+    assert set(synthetic.columns) == set(source.columns)
+    for column in ("age", "income", "tenure_months"):
+        assert synthetic[column].min() >= source[column].min() - 1e-9
+        assert synthetic[column].max() <= source[column].max() + 1e-9
+    for column in ("city", "plan", "churned"):
+        assert set(synthetic[column].unique()) <= set(source[column].unique())
+
+
+def test_copula_keeps_the_strongest_correlation(source: pd.DataFrame) -> None:
+    model = GaussianCopula(n_bins=8).fit(source)
+    synthetic = model.sample(4000, seed=5)
+    real = float(source["age"].corr(source["income"]))
+    generated = float(synthetic["age"].corr(synthetic["income"]))
+    assert real > 0.3
+    assert generated == pytest.approx(real, abs=0.15)
+
+
+def test_copula_is_deterministic_for_a_fixed_seed(source: pd.DataFrame) -> None:
+    model = GaussianCopula().fit(source)
+    first = model.sample(50, seed=9)
+    second = model.sample(50, seed=9)
+    third = model.sample(50, seed=10)
+    pd.testing.assert_frame_equal(first, second)
+    assert not first.equals(third)
