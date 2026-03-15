@@ -126,3 +126,27 @@ def test_copula_is_deterministic_for_a_fixed_seed(source: pd.DataFrame) -> None:
     third = model.sample(50, seed=10)
     pd.testing.assert_frame_equal(first, second)
     assert not first.equals(third)
+
+
+def test_copula_requires_a_numeric_column() -> None:
+    frame = pd.DataFrame({"city": ["a", "b", "a", "c"]})
+    with pytest.raises(ValueError, match="at least one numeric"):
+        GaussianCopula().fit(frame)
+
+
+def test_copula_sample_before_fit_raises() -> None:
+    with pytest.raises(ValueError, match="call fit"):
+        GaussianCopula().sample(10)
+
+
+def test_fit_conditional_probabilities_are_normalised() -> None:
+    driver = np.linspace(0.0, 10.0, 200)
+    levels = pd.Series(np.where(driver > 5, "high", "low"), name="band")
+    conditional = fit_conditional(levels, driver, n_bins=4)
+    assert isinstance(conditional, ConditionalCategorical)
+    assert conditional.probabilities.shape == (4, 2)
+    assert np.allclose(conditional.probabilities.sum(axis=1), 1.0)
+    assert conditional.levels == ("high", "low")
+    rng = np.random.default_rng(0)
+    sampled = conditional.sample(np.full(50, 9.0), rng)
+    assert (sampled == "high").mean() > 0.8
