@@ -177,3 +177,5 @@ def format_number(n: int) -> str:
 # Add evaluation with FID score metric [2026-03-10T17:11:56]
 
 # Add synthetic time series generation module [2026-03-11T14:33:24]
+
+# Add data de-identification pipeline steps [2026-03-17T19:55:53]
