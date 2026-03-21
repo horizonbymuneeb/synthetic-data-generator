@@ -150,3 +150,19 @@ def test_fit_conditional_probabilities_are_normalised() -> None:
     rng = np.random.default_rng(0)
     sampled = conditional.sample(np.full(50, 9.0), rng)
     assert (sampled == "high").mean() > 0.8
+
+
+def test_fit_helper_and_marginal_quantiles(source: pd.DataFrame) -> None:
+    model = fit(source, n_bins=5)
+    quantiles = model.marginal_quantiles("age", np.asarray([0.0, 0.5, 1.0]))
+    assert quantiles[0] == pytest.approx(source["age"].min())
+    assert quantiles[2] == pytest.approx(source["age"].max())
+    assert quantiles[0] <= quantiles[1] <= quantiles[2]
+    with pytest.raises(KeyError):
+        model.marginal_quantiles("city", np.asarray([0.5]))
+
+
+def test_profile_is_reused_when_supplied(source: pd.DataFrame) -> None:
+    profile = profile_frame(source)
+    model = GaussianCopula().fit(source, profile=profile)
+    assert model.numeric_columns == profile.numeric_columns

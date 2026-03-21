@@ -52,3 +52,51 @@ class FidelityReport:
     def worst_columns(self, n: int = 3) -> list[tuple[str, float]]:
         ranked = sorted(self.ks_by_column.items(), key=lambda item: item[1], reverse=True)
         return ranked[:n]
+
+
+@dataclass(frozen=True)
+class PrivacyReport:
+    """Copying and memorisation signals for one synthetic table."""
+
+    dcr_mean: float
+    dcr_percentiles: dict[str, float]
+    exact_duplicate_rate: float
+    internal_duplicate_rate: float
+
+    @property
+    def is_copy(self) -> bool:
+        """A table whose nearest real neighbour is essentially itself."""
+        return self.exact_duplicate_rate > 0.5
+
+
+@dataclass(frozen=True)
+class EvaluationResult:
+    """Both halves of the evaluation, plus the shapes they were computed on."""
+
+    n_real: int
+    n_synthetic: int
+    fidelity: FidelityReport
+    privacy: PrivacyReport
+    extra: dict[str, float] = field(default_factory=dict)
+
+    def summary(self) -> dict[str, float]:
+        values = {
+            "n_real": float(self.n_real),
+            "n_synthetic": float(self.n_synthetic),
+            "mean_ks": self.fidelity.mean_ks,
+            "mean_tv": self.fidelity.mean_tv,
+            "correlation_delta": self.fidelity.correlation_delta,
+            "dcr_mean": self.privacy.dcr_mean,
+            "exact_duplicate_rate": self.privacy.exact_duplicate_rate,
+        }
+        values.update(self.extra)
+        return values
+
+
+def ks_statistic(real: np.ndarray, synthetic: np.ndarray) -> float:
+    """Two-sample Kolmogorov-Smirnov distance in [0, 1]."""
+    real = np.asarray(real, dtype=float)
+    synthetic = np.asarray(synthetic, dtype=float)
+    if real.size == 0 or synthetic.size == 0:
+        raise ValueError("ks_statistic needs two non-empty samples")
+    return float(stats.ks_2samp(real, synthetic).statistic)
