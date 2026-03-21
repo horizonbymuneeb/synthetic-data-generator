@@ -359,3 +359,4 @@
 [2026-03-11T14:33:24] Add synthetic time series generation module
 [2026-03-15T18:11:15] Implement domain adaptation for transfer
 [2026-03-17T19:55:53] Add data de-identification pipeline steps
+[2026-03-21T12:47:35] Add VAE for image generation pipeline
