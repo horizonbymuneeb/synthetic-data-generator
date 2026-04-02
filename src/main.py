@@ -318,3 +318,5 @@ if __name__ == '__main__':
 # Add VAE for image generation pipeline [2026-03-21T12:47:35]
 
 # Update Faker-based synthetic data generator [2026-03-29T16:51:37]
+
+# WIP: benchmarking against SDV library baseline [2026-04-02T20:37:58]
