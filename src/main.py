@@ -320,3 +320,5 @@ if __name__ == '__main__':
 # Update Faker-based synthetic data generator [2026-03-29T16:51:37]
 
 # WIP: benchmarking against SDV library baseline [2026-04-02T20:37:58]
+
+# Implement domain adaptation for transfer [2026-04-06T13:40:25]
