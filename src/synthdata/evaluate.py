@@ -132,3 +132,47 @@ def missing_rate_delta(real: pd.DataFrame, synthetic: pd.DataFrame) -> dict[str,
         for column in real.columns
         if column in synthetic.columns
     }
+
+
+def fidelity(real: pd.DataFrame, synthetic: pd.DataFrame, profile: DatasetProfile | None = None) -> FidelityReport:
+    """Compute the fidelity block of the evaluation."""
+    profile = profile or profile_frame(real)
+    numeric = [name for name in profile.numeric_columns if name in synthetic.columns]
+    categorical = [name for name in profile.categorical_columns if name in synthetic.columns]
+    ks_by_column = {name: ks_statistic(real[name].dropna(), synthetic[name].dropna()) for name in numeric}
+    tv_by_column = {name: tv_distance(real[name], synthetic[name]) for name in categorical}
+    mean_delta, max_delta = correlation_delta(real, synthetic, numeric)
+    return FidelityReport(
+        ks_by_column=ks_by_column,
+        tv_by_column=tv_by_column,
+        correlation_delta=mean_delta,
+        correlation_max_delta=max_delta,
+        missing_rate_delta=missing_rate_delta(real, synthetic),
+    )
+
+
+def scaled_numeric(frame: pd.DataFrame, columns: list[str]) -> np.ndarray:
+    """Min-max scale the numeric block so distances are comparable across columns."""
+    block = frame[columns].to_numpy(dtype=float)
+    if block.size == 0:
+        raise ValueError("scaled_numeric needs at least one column")
+    if not np.all(np.isfinite(block)):
+        raise ValueError("scaled_numeric cannot handle non-finite values")
+    minimum = block.min(axis=0)
+    span = block.max(axis=0) - minimum
+    span[span == 0] = 1.0
+    return (block - minimum) / span
+
+
+def distance_to_closest_record(real: pd.DataFrame, synthetic: pd.DataFrame, columns: list[str]) -> np.ndarray:
+    """For each synthetic row, the L2 distance to the nearest real row."""
+    if not columns:
+        raise ValueError("distance_to_closest_record needs numeric columns")
+    real_block = scaled_numeric(real, columns)
+    synthetic_block = scaled_numeric(pd.concat([real, synthetic], ignore_index=True), columns)[len(real) :]
+    distances = np.empty(len(synthetic_block), dtype=float)
+    for start in range(0, len(synthetic_block), 512):
+        chunk = synthetic_block[start : start + 512]
+        pairwise = np.linalg.norm(chunk[:, None, :] - real_block[None, :, :], axis=2)
+        distances[start : start + 512] = pairwise.min(axis=1)
+    return distances
