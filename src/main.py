@@ -322,3 +322,5 @@ if __name__ == '__main__':
 # WIP: benchmarking against SDV library baseline [2026-04-02T20:37:58]
 
 # Implement domain adaptation for transfer [2026-04-06T13:40:25]
+
+# Add evaluation with FID score metric [2026-04-06T17:39:35]
