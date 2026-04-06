@@ -100,3 +100,35 @@ def ks_statistic(real: np.ndarray, synthetic: np.ndarray) -> float:
     if real.size == 0 or synthetic.size == 0:
         raise ValueError("ks_statistic needs two non-empty samples")
     return float(stats.ks_2samp(real, synthetic).statistic)
+
+
+def tv_distance(real: pd.Series, synthetic: pd.Series) -> float:
+    """Total-variation distance between two categorical distributions."""
+    real_counts = real.dropna().astype(str).value_counts(normalize=True)
+    synthetic_counts = synthetic.dropna().astype(str).value_counts(normalize=True)
+    if real_counts.empty or synthetic_counts.empty:
+        raise ValueError("tv_distance needs two non-empty samples")
+    levels = real_counts.index.union(synthetic_counts.index)
+    difference = real_counts.reindex(levels, fill_value=0.0) - synthetic_counts.reindex(levels, fill_value=0.0)
+    return float(0.5 * np.abs(difference).sum())
+
+
+def correlation_delta(real: pd.DataFrame, synthetic: pd.DataFrame, columns: list[str]) -> tuple[float, float]:
+    """Mean and max absolute difference between numeric correlation matrices."""
+    if len(columns) < 2:
+        return 0.0, 0.0
+    real_corr = np.corrcoef(real[columns].to_numpy(dtype=float), rowvar=False)
+    synthetic_corr = np.corrcoef(synthetic[columns].to_numpy(dtype=float), rowvar=False)
+    if not np.all(np.isfinite(real_corr)) or not np.all(np.isfinite(synthetic_corr)):
+        return float("nan"), float("nan")
+    delta = np.abs(real_corr - synthetic_corr)
+    return float(np.mean(delta)), float(np.max(delta))
+
+
+def missing_rate_delta(real: pd.DataFrame, synthetic: pd.DataFrame) -> dict[str, float]:
+    """Absolute difference in missing share, per column."""
+    return {
+        column: abs(float(real[column].isna().mean()) - float(synthetic[column].isna().mean()))
+        for column in real.columns
+        if column in synthetic.columns
+    }
