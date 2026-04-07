@@ -176,3 +176,47 @@ def distance_to_closest_record(real: pd.DataFrame, synthetic: pd.DataFrame, colu
         pairwise = np.linalg.norm(chunk[:, None, :] - real_block[None, :, :], axis=2)
         distances[start : start + 512] = pairwise.min(axis=1)
     return distances
+
+
+def duplicate_rate(real: pd.DataFrame, synthetic: pd.DataFrame) -> tuple[float, float]:
+    """Exact-match rate against the real rows, and internal duplicate rate."""
+    real_keys = set(map(tuple, real.astype(str).to_numpy()))
+    synthetic_keys = list(map(tuple, synthetic.astype(str).to_numpy()))
+    if not synthetic_keys:
+        raise ValueError("synthetic frame is empty")
+    matches = sum(1 for key in synthetic_keys if key in real_keys) / len(synthetic_keys)
+    internal = 1.0 - len(set(synthetic_keys)) / len(synthetic_keys)
+    return float(matches), float(internal)
+
+
+def privacy(real: pd.DataFrame, synthetic: pd.DataFrame, profile: DatasetProfile | None = None) -> PrivacyReport:
+    """Compute the privacy block of the evaluation."""
+    profile = profile or profile_frame(real)
+    numeric = [name for name in profile.numeric_columns if name in synthetic.columns]
+    if not numeric:
+        raise ValueError("privacy metrics need at least one shared numeric column")
+    distances = distance_to_closest_record(real, synthetic, numeric)
+    percentiles = {f"p{int(p)}": float(np.percentile(distances, p)) for p in DCR_PERCENTILES}
+    exact, internal = duplicate_rate(real, synthetic)
+    return PrivacyReport(
+        dcr_mean=float(distances.mean()),
+        dcr_percentiles=percentiles,
+        exact_duplicate_rate=exact,
+        internal_duplicate_rate=internal,
+    )
+
+
+def evaluate(real: pd.DataFrame, synthetic: pd.DataFrame) -> EvaluationResult:
+    """Run both blocks and return one result object."""
+    if real.empty or synthetic.empty:
+        raise ValueError("evaluate needs two non-empty frames")
+    shared = [column for column in real.columns if column in synthetic.columns]
+    if not shared:
+        raise ValueError("real and synthetic frames share no columns")
+    profile = profile_frame(real)
+    return EvaluationResult(
+        n_real=int(len(real)),
+        n_synthetic=int(len(synthetic)),
+        fidelity=fidelity(real, synthetic, profile),
+        privacy=privacy(real, synthetic, profile),
+    )
