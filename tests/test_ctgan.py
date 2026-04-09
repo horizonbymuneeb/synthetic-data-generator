@@ -42,3 +42,32 @@ def test_mode_normalizer_roundtrips_values() -> None:
     inside = np.abs(normalised) <= 1.0
     assert inside.any()
     assert np.allclose(normalizer.inverse_transform(clipped, modes)[inside], recovered[inside], atol=1e-9)
+
+
+def test_mode_normalizer_finds_the_planted_modes() -> None:
+    rng = np.random.default_rng(0)
+    values = np.concatenate([rng.normal(10, 0.5, 200), rng.normal(40, 0.5, 200), rng.normal(70, 0.5, 200)])
+    normalizer = ModeSpecificNormalizer(name="x").fit(values, max_modes=3)
+    assert normalizer.n_modes == 3
+    assert np.allclose(np.sort(normalizer.centres), [10.0, 40.0, 70.0], atol=2.0)
+    assert np.allclose(normalizer.weights, 1 / 3, atol=0.05)
+
+
+def test_mode_normalizer_rejects_degenerate_input() -> None:
+    with pytest.raises(ValueError, match="at least two"):
+        ModeSpecificNormalizer().fit(np.asarray([1.0]))
+    with pytest.raises(ValueError, match="non-finite"):
+        ModeSpecificNormalizer().fit(np.asarray([1.0, np.nan]))
+    with pytest.raises(ValueError, match="call fit"):
+        ModeSpecificNormalizer().transform(np.asarray([1.0]))
+
+
+def test_categorical_encoder_one_hot_roundtrip() -> None:
+    series = pd.Series(["plus", "basic", "pro", "basic"], name="plan")
+    encoder = CategoricalEncoder().fit(series)
+    assert encoder.levels == ("basic", "plus", "pro")
+    assert encoder.width == 3
+    matrix = encoder.transform(series)
+    assert matrix.shape == (4, 3)
+    assert np.allclose(matrix.sum(axis=1), 1.0)
+    assert encoder.inverse_transform(matrix).tolist() == series.tolist()

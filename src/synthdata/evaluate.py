@@ -220,3 +220,25 @@ def evaluate(real: pd.DataFrame, synthetic: pd.DataFrame) -> EvaluationResult:
         fidelity=fidelity(real, synthetic, profile),
         privacy=privacy(real, synthetic, profile),
     )
+
+
+def format_report(result: EvaluationResult) -> str:
+    """Render an :class:`EvaluationResult` as a plain-text report."""
+    lines = [
+        f"real rows: {result.n_real}   synthetic rows: {result.n_synthetic}",
+        "",
+        "fidelity",
+    ]
+    for column, value in sorted(result.fidelity.ks_by_column.items()):
+        lines.append(f"  KS  {column:<16} {value:.4f}")
+    for column, value in sorted(result.fidelity.tv_by_column.items()):
+        lines.append(f"  TV  {column:<16} {value:.4f}")
+    lines.append(f"  correlation delta  mean={result.fidelity.correlation_delta:.4f} "
+                 f"max={result.fidelity.correlation_max_delta:.4f}")
+    lines.extend(["", "privacy"])
+    lines.append(f"  distance to closest record  mean={result.privacy.dcr_mean:.4f}")
+    for label, value in result.privacy.dcr_percentiles.items():
+        lines.append(f"    {label}={value:.4f}")
+    lines.append(f"  exact duplicate rate   {result.privacy.exact_duplicate_rate:.4f}")
+    lines.append(f"  internal duplicate rate {result.privacy.internal_duplicate_rate:.4f}")
+    return "\n".join(lines)
