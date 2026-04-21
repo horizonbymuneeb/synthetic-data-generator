@@ -13,3 +13,6 @@ from enum import Enum
 
 import numpy as np
 import pandas as pd
+
+MAX_CATEGORICAL_LEVELS: int = 64
+DATETIME_GRANULARITIES: tuple[str, ...] = ("D", "M", "Y")

@@ -71,3 +71,32 @@ def test_categorical_encoder_one_hot_roundtrip() -> None:
     assert matrix.shape == (4, 3)
     assert np.allclose(matrix.sum(axis=1), 1.0)
     assert encoder.inverse_transform(matrix).tolist() == series.tolist()
+
+
+def test_categorical_encoder_handles_unseen_levels_as_absent() -> None:
+    encoder = CategoricalEncoder().fit(pd.Series(["a", "b"], name="x"))
+    matrix = encoder.transform(pd.Series(["a", "zzz"], name="x"))
+    assert matrix[1].sum() == 0.0
+    with pytest.raises(ValueError, match="2 columns"):
+        encoder.inverse_transform(np.zeros((2, 5)))
+
+
+def test_categorical_encoder_samples_frequent_levels_more_often() -> None:
+    encoder = CategoricalEncoder().fit(pd.Series(["a", "a", "a", "b"], name="x"))
+    probabilities = np.asarray([0.9, 0.1])
+    sample = encoder.sample_one_hot(2000, probabilities, seed=1)
+    assert sample.shape == (2000, 2)
+    assert np.allclose(sample.sum(axis=1), 1.0)
+    assert sample[:, 0].mean() == pytest.approx(0.9, abs=0.05)
+
+
+def test_generator_and_discriminator_shapes() -> None:
+    import torch
+
+    generator = Generator(noise_dim=8, cond_dim=4, data_dim=3, hidden_dim=16)
+    discriminator = Discriminator(data_dim=3, cond_dim=4, hidden_dim=16)
+    rows = generator(torch.zeros(5, 8), torch.zeros(5, 4))
+    assert tuple(rows.shape) == (5, 3)
+    assert float(rows.abs().max()) <= 1.0
+    scores = discriminator(rows, torch.zeros(5, 4))
+    assert tuple(scores.shape) == (5, 1)
