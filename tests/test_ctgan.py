@@ -100,3 +100,27 @@ def test_generator_and_discriminator_shapes() -> None:
     assert float(rows.abs().max()) <= 1.0
     scores = discriminator(rows, torch.zeros(5, 4))
     assert tuple(scores.shape) == (5, 1)
+
+
+def test_ctgan_fit_then_sample_matches_the_source_columns(fast_model: CTGANLite, source: pd.DataFrame) -> None:
+    synthetic = fast_model.sample(120, seed=4)
+    assert synthetic.shape == (120, len(source.columns))
+    assert set(synthetic.columns) == set(source.columns)
+    for column in ("age", "income", "tenure_months"):
+        assert np.all(np.isfinite(synthetic[column]))
+        assert synthetic[column].min() >= source[column].min() - 1e-6
+        assert synthetic[column].max() <= source[column].max() + 1e-6
+    for column in ("city", "plan", "churned"):
+        assert set(synthetic[column].unique()) <= set(source[column].unique())
+
+
+def test_ctgan_training_records_one_loss_per_epoch(fast_model: CTGANLite) -> None:
+    assert len(fast_model.loss_history) == fast_model.config.epochs
+    assert all(np.isfinite(value) for value in fast_model.loss_history)
+    assert fast_model.condition_dim == sum(encoder.width for encoder in fast_model.encoders.values())
+
+
+def test_ctgan_is_deterministic_for_a_fixed_seed(fast_model: CTGANLite) -> None:
+    first = fast_model.sample(30, seed=7)
+    second = fast_model.sample(30, seed=7)
+    pd.testing.assert_frame_equal(first, second)
