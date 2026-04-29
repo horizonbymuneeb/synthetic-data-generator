@@ -66,3 +66,59 @@ class CategoricalStats:
         if level not in self.levels:
             raise KeyError(f"unknown level {level!r}")
         return self.frequencies[self.levels.index(level)]
+
+
+@dataclass(frozen=True)
+class DatetimeStats:
+    """Range and granularity of a datetime column."""
+
+    minimum: pd.Timestamp
+    maximum: pd.Timestamp
+    granularity: str
+    n_observed: int
+
+    @property
+    def span_days(self) -> int:
+        return int((self.maximum - self.minimum).days)
+
+
+@dataclass(frozen=True)
+class ColumnProfile:
+    """Everything the generators need to know about one column."""
+
+    name: str
+    kind: ColumnKind
+    missing_rate: float
+    n_unique: int
+    numeric: NumericStats | None = None
+    categorical: CategoricalStats | None = None
+    datetime: DatetimeStats | None = None
+
+
+@dataclass(frozen=True)
+class DatasetProfile:
+    """Profile of a whole table, keyed by column name."""
+
+    n_rows: int
+    columns: dict[str, ColumnProfile] = field(default_factory=dict)
+
+    def of_kind(self, kind: ColumnKind) -> list[str]:
+        return [name for name, col in self.columns.items() if col.kind is kind]
+
+    @property
+    def numeric_columns(self) -> list[str]:
+        return self.of_kind(ColumnKind.NUMERIC)
+
+    @property
+    def categorical_columns(self) -> list[str]:
+        return self.of_kind(ColumnKind.CATEGORICAL)
+
+    @property
+    def datetime_columns(self) -> list[str]:
+        return self.of_kind(ColumnKind.DATETIME)
+
+    def column(self, name: str) -> ColumnProfile:
+        try:
+            return self.columns[name]
+        except KeyError as exc:
+            raise KeyError(f"column {name!r} is not in the profile") from exc

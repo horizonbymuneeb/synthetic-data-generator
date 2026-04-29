@@ -124,3 +124,23 @@ def test_ctgan_is_deterministic_for_a_fixed_seed(fast_model: CTGANLite) -> None:
     first = fast_model.sample(30, seed=7)
     second = fast_model.sample(30, seed=7)
     pd.testing.assert_frame_equal(first, second)
+
+
+def test_ctgan_sample_before_fit_raises() -> None:
+    with pytest.raises(ValueError, match="call fit"):
+        CTGANLite().sample(5)
+
+
+def test_ctgan_config_validation() -> None:
+    with pytest.raises(ValueError, match="epochs"):
+        CTGANConfig(epochs=0)
+    with pytest.raises(ValueError, match="batch_size"):
+        CTGANConfig(batch_size=1)
+    with pytest.raises(ValueError, match="learning_rate"):
+        CTGANConfig(learning_rate=1.5)
+
+
+def test_ctgan_needs_a_numeric_column() -> None:
+    frame = pd.DataFrame({"plan": ["basic", "plus", "basic"]})
+    with pytest.raises(ValueError, match="at least one numeric"):
+        CTGANLite(config=CTGANConfig(epochs=1)).fit(frame)
