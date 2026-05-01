@@ -195,3 +195,5 @@ def format_number(n: int) -> str:
 # Add VAE for image generation pipeline [2026-04-22T12:55:30]
 
 # Implement data quality validation checks [2026-04-29T09:04:43]
+
+# Update documentation for generation API [2026-05-01T12:20:32]
