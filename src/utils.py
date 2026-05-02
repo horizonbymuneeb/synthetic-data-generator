@@ -197,3 +197,5 @@ def format_number(n: int) -> str:
 # Implement data quality validation checks [2026-04-29T09:04:43]
 
 # Update documentation for generation API [2026-05-01T12:20:32]
+
+# Update training loop with EMA for stability [2026-05-02T20:25:55]
