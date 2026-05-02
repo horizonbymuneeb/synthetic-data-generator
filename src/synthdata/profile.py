@@ -122,3 +122,65 @@ class DatasetProfile:
             return self.columns[name]
         except KeyError as exc:
             raise KeyError(f"column {name!r} is not in the profile") from exc
+
+
+def infer_kind(series: pd.Series, max_levels: int = MAX_CATEGORICAL_LEVELS) -> ColumnKind:
+    """Classify a column by dtype and cardinality.
+
+    Object and boolean columns are categorical. Numeric columns stay numeric
+    even when they are discrete, because a generator that treats ``age`` as a
+    categorical would destroy its ordering. A column with a single observed
+    value is constant regardless of dtype: nothing can be learned from it.
+    """
+    observed = series.dropna()
+    if observed.empty:
+        raise ValueError(f"column {series.name!r} has no observed values")
+    if observed.nunique(dropna=True) <= 1:
+        return ColumnKind.CONSTANT
+    if pd.api.types.is_datetime64_any_dtype(series):
+        return ColumnKind.DATETIME
+    if pd.api.types.is_bool_dtype(series) or not pd.api.types.is_numeric_dtype(series):
+        if observed.nunique(dropna=True) > max_levels:
+            raise ValueError(
+                f"column {series.name!r} looks categorical but has "
+                f"{observed.nunique(dropna=True)} levels (max {max_levels})"
+            )
+        return ColumnKind.CATEGORICAL
+    return ColumnKind.NUMERIC
+
+
+def numeric_stats(series: pd.Series) -> NumericStats:
+    """Compute mean/std/min/max/median/skew from the observed values."""
+    observed = pd.to_numeric(series, errors="coerce").dropna()
+    if observed.empty:
+        raise ValueError(f"column {series.name!r} has no numeric values")
+    values = observed.to_numpy(dtype=float)
+    std = float(values.std(ddof=1)) if values.size > 1 else 0.0
+    if values.size > 2 and std > 0:
+        centred = (values - values.mean()) / std
+        skew = float(np.mean(centred**3))
+    else:
+        skew = 0.0
+    return NumericStats(
+        mean=float(values.mean()),
+        std=std,
+        minimum=float(values.min()),
+        maximum=float(values.max()),
+        median=float(np.median(values)),
+        skew=skew,
+        n_observed=int(values.size),
+    )
+
+
+def categorical_stats(series: pd.Series) -> CategoricalStats:
+    """Return levels and frequencies, most frequent first."""
+    observed = series.dropna().astype(str)
+    if observed.empty:
+        raise ValueError(f"column {series.name!r} has no observed values")
+    counts = observed.value_counts()
+    total = float(counts.sum())
+    return CategoricalStats(
+        levels=tuple(str(level) for level in counts.index),
+        frequencies=tuple(float(c) / total for c in counts.to_numpy()),
+        n_observed=int(total),
+    )
