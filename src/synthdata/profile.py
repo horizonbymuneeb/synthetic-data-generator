@@ -184,3 +184,56 @@ def categorical_stats(series: pd.Series) -> CategoricalStats:
         frequencies=tuple(float(c) / total for c in counts.to_numpy()),
         n_observed=int(total),
     )
+
+
+def infer_granularity(series: pd.Series) -> str:
+    """Precision of the observed timestamps.
+
+    ``D`` when values carry a day component, ``M`` when every value is the first
+    day of a month, ``Y`` when every value is the first day of January. The
+    generators use this to bucket a datetime column before treating it as
+    categorical, so the answer describes the data rather than the range.
+    """
+    observed = pd.to_datetime(series.dropna())
+    if observed.empty:
+        raise ValueError(f"column {series.name!r} has no timestamps")
+    if not bool((observed.dt.day == 1).all()):
+        return "D"
+    if not bool((observed.dt.month == 1).all()):
+        return "M"
+    return "Y"
+
+
+def datetime_stats(series: pd.Series) -> DatetimeStats:
+    """Range plus granularity for a datetime column."""
+    observed = pd.to_datetime(series.dropna())
+    if observed.empty:
+        raise ValueError(f"column {series.name!r} has no timestamps")
+    return DatetimeStats(
+        minimum=pd.Timestamp(observed.min()),
+        maximum=pd.Timestamp(observed.max()),
+        granularity=infer_granularity(series),
+        n_observed=int(observed.size),
+    )
+
+
+def profile_column(series: pd.Series) -> ColumnProfile:
+    """Profile one column, dispatching on :func:`infer_kind`."""
+    if series.empty:
+        raise ValueError(f"column {series.name!r} is empty")
+    kind = infer_kind(series)
+    missing_rate = float(series.isna().mean())
+    n_unique = int(series.dropna().nunique())
+    profile = ColumnProfile(
+        name=str(series.name),
+        kind=kind,
+        missing_rate=missing_rate,
+        n_unique=n_unique,
+    )
+    if kind is ColumnKind.NUMERIC:
+        return ColumnProfile(**{**profile.__dict__, "numeric": numeric_stats(series)})
+    if kind is ColumnKind.CATEGORICAL:
+        return ColumnProfile(**{**profile.__dict__, "categorical": categorical_stats(series)})
+    if kind is ColumnKind.DATETIME:
+        return ColumnProfile(**{**profile.__dict__, "datetime": datetime_stats(series)})
+    return profile
