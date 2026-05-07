@@ -237,3 +237,35 @@ def profile_column(series: pd.Series) -> ColumnProfile:
     if kind is ColumnKind.DATETIME:
         return ColumnProfile(**{**profile.__dict__, "datetime": datetime_stats(series)})
     return profile
+
+
+def profile_frame(frame: pd.DataFrame) -> DatasetProfile:
+    """Profile every column of ``frame`` in a single pass."""
+    if frame.shape[1] == 0:
+        raise ValueError("cannot profile a frame with no columns")
+    if frame.empty:
+        raise ValueError("cannot profile an empty frame")
+    return DatasetProfile(
+        n_rows=int(frame.shape[0]),
+        columns={str(name): profile_column(frame[name]) for name in frame.columns},
+    )
+
+
+def describe_profile(profile: DatasetProfile) -> str:
+    """Human-readable table of the profile, one line per column."""
+    lines = [f"{profile.n_rows} rows, {len(profile.columns)} columns"]
+    width = max(len(name) for name in profile.columns)
+    for name, column in profile.columns.items():
+        if column.numeric is not None:
+            detail = (
+                f"mean={column.numeric.mean:.3g} std={column.numeric.std:.3g} "
+                f"range=[{column.numeric.minimum:.3g}, {column.numeric.maximum:.3g}]"
+            )
+        elif column.categorical is not None:
+            detail = f"{len(column.categorical.levels)} levels, top={column.categorical.top_level!r}"
+        elif column.datetime is not None:
+            detail = f"{column.datetime.minimum.date()}..{column.datetime.maximum.date()} @{column.datetime.granularity}"
+        else:
+            detail = "single value"
+        lines.append(f"  {name:<{width}}  {column.kind.value:<11} missing={column.missing_rate:.1%}  {detail}")
+    return "\n".join(lines)
