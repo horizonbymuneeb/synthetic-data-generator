@@ -381,3 +381,4 @@
 [2026-05-02T10:21:38] Update Faker-based synthetic data generator
 [2026-05-03T12:11:53] Update Faker-based synthetic data generator
 [2026-05-05T13:15:01] Add data de-identification pipeline steps
+[2026-05-07T18:57:36] WIP: debugging mode collapse in generator
