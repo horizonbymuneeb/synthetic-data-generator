@@ -338,3 +338,5 @@ if __name__ == '__main__':
 # Update Faker-based synthetic data generator [2026-05-03T12:11:53]
 
 # Add data de-identification pipeline steps [2026-05-05T13:15:01]
+
+# Fix memory leak in batch generation worker [2026-05-07T09:14:25]
