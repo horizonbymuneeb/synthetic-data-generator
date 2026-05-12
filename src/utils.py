@@ -201,3 +201,5 @@ def format_number(n: int) -> str:
 # Update training loop with EMA for stability [2026-05-02T20:25:55]
 
 # WIP: debugging mode collapse in generator [2026-05-07T18:57:36]
+
+# WIP: benchmarking against SDV library baseline [2026-05-12T14:40:11]
