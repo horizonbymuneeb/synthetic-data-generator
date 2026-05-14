@@ -385,3 +385,4 @@
 [2026-05-07T09:14:25] Fix memory leak in batch generation worker
 [2026-05-12T17:05:52] Implement tabular GAN for synthetic records
 [2026-05-12T14:40:11] WIP: benchmarking against SDV library baseline
+[2026-05-14T10:44:12] Add support for long tail distributions

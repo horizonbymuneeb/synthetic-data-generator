@@ -203,3 +203,5 @@ def format_number(n: int) -> str:
 # WIP: debugging mode collapse in generator [2026-05-07T18:57:36]
 
 # WIP: benchmarking against SDV library baseline [2026-05-12T14:40:11]
+
+# Add support for long tail distributions [2026-05-14T10:44:12]
