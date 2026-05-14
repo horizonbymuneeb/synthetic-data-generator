@@ -8,3 +8,14 @@ and discrete, two categorical columns have uneven level frequencies, one
 categorical column is the modelling target and depends on a numeric column, and
 there is a datetime column with month granularity.
 """
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import date, timedelta
+
+import numpy as np
+import pandas as pd
+
+CITY_LEVELS: tuple[str, ...] = ("haripur", "islamabad", "lahore", "karachi", "remote")
+PLAN_LEVELS: tuple[str, ...] = ("basic", "plus", "pro")
