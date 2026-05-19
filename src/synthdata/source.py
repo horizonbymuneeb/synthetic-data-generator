@@ -19,3 +19,6 @@ import pandas as pd
 
 CITY_LEVELS: tuple[str, ...] = ("haripur", "islamabad", "lahore", "karachi", "remote")
 PLAN_LEVELS: tuple[str, ...] = ("basic", "plus", "pro")
+CHURN_LEVELS: tuple[str, ...] = ("no", "yes")
+PLAN_WEIGHTS: tuple[float, ...] = (0.52, 0.31, 0.17)
+CITY_WEIGHTS: tuple[float, ...] = (0.24, 0.27, 0.2, 0.19, 0.1)
