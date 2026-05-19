@@ -207,3 +207,5 @@ def format_number(n: int) -> str:
 # Add support for long tail distributions [2026-05-14T10:44:12]
 
 # Add evaluation with FID score metric [2026-05-14T20:55:13]
+
+# Update Faker-based synthetic data generator [2026-05-19T20:58:16]
