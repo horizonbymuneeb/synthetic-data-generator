@@ -342,3 +342,5 @@ if __name__ == '__main__':
 # Fix memory leak in batch generation worker [2026-05-07T09:14:25]
 
 # Implement tabular GAN for synthetic records [2026-05-12T17:05:52]
+
+# WIP: benchmarking against SDV library baseline [2026-05-19T13:10:27]
