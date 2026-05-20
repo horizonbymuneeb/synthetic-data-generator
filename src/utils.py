@@ -209,3 +209,5 @@ def format_number(n: int) -> str:
 # Add evaluation with FID score metric [2026-05-14T20:55:13]
 
 # Update Faker-based synthetic data generator [2026-05-19T20:58:16]
+
+# Implement tabular GAN for synthetic records [2026-05-20T18:16:46]
