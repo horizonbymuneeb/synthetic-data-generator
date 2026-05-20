@@ -55,3 +55,22 @@ def test_ks_statistic_rejects_empty_samples() -> None:
 def test_tv_distance_is_zero_for_the_same_distribution() -> None:
     series = pd.Series(["a", "a", "b", "c"])
     assert tv_distance(series, series) == pytest.approx(0.0)
+
+
+def test_tv_distance_is_one_for_disjoint_supports() -> None:
+    left = pd.Series(["a", "a", "b"])
+    right = pd.Series(["x", "y", "y"])
+    assert tv_distance(left, right) == pytest.approx(1.0)
+
+
+def test_tv_distance_reports_half_the_absolute_mass_difference() -> None:
+    left = pd.Series(["a", "a", "b", "b"])
+    right = pd.Series(["a", "a", "a", "b"])
+    # P(a) 0.5 -> 0.75, P(b) 0.5 -> 0.25, so half of |0.25| + |0.25| = 0.25
+    assert tv_distance(left, right) == pytest.approx(0.25)
+
+
+def test_correlation_delta_is_zero_for_identical_frames(source: pd.DataFrame) -> None:
+    mean_delta, max_delta = correlation_delta(source, source, ["age", "income", "tenure_months"])
+    assert mean_delta == pytest.approx(0.0, abs=1e-12)
+    assert max_delta == pytest.approx(0.0, abs=1e-12)
