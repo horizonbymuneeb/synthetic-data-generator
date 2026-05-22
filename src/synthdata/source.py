@@ -47,3 +47,27 @@ class SourceSpec:
             raise ValueError(f"latent_correlation must be 3x3, got {corr.shape}")
         if not np.allclose(np.diag(corr), 1.0):
             raise ValueError("latent_correlation diagonal must be 1.0")
+
+
+def latent_normals(n_rows: int, correlation: np.ndarray, seed: int) -> np.ndarray:
+    """Draw ``n_rows`` correlated standard normals with the given correlation."""
+    corr = np.asarray(correlation, dtype=float)
+    eigenvalues, eigenvectors = np.linalg.eigh(corr)
+    if eigenvalues.min() < -1e-8:
+        raise ValueError("correlation matrix is not positive semi-definite")
+    factor = eigenvectors @ np.diag(np.sqrt(np.clip(eigenvalues, 0.0, None)))
+    rng = np.random.default_rng(seed)
+    standard = rng.standard_normal((n_rows, corr.shape[0]))
+    return standard @ factor.T
+
+
+def age_column(latent: np.ndarray) -> np.ndarray:
+    """Map the first latent factor to a plausible adult age in whole years."""
+    raw = 38.0 + 9.5 * latent[:, 0]
+    return np.clip(np.rint(raw), 18, 72).astype(np.int64)
+
+
+def income_column(latent: np.ndarray) -> np.ndarray:
+    """Second latent factor drives a log-normal monthly income (heavy tail)."""
+    log_income = 9.15 + 0.42 * latent[:, 1]
+    return np.rint(np.exp(log_income)).astype(np.int64)

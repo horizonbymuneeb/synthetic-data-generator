@@ -74,3 +74,24 @@ def test_correlation_delta_is_zero_for_identical_frames(source: pd.DataFrame) ->
     mean_delta, max_delta = correlation_delta(source, source, ["age", "income", "tenure_months"])
     assert mean_delta == pytest.approx(0.0, abs=1e-12)
     assert max_delta == pytest.approx(0.0, abs=1e-12)
+
+
+def test_correlation_delta_detects_a_broken_dependency(source: pd.DataFrame) -> None:
+    shuffled = source.copy()
+    rng = np.random.default_rng(2)
+    shuffled["income"] = rng.permutation(shuffled["income"].to_numpy())
+    mean_delta, max_delta = correlation_delta(source, shuffled, ["age", "income", "tenure_months"])
+    assert mean_delta > 0.05
+    assert max_delta >= mean_delta
+
+
+def test_correlation_delta_needs_two_columns(source: pd.DataFrame) -> None:
+    assert correlation_delta(source, source, ["age"]) == (0.0, 0.0)
+
+
+def test_missing_rate_delta_only_compares_shared_columns(source: pd.DataFrame) -> None:
+    synthetic = source.copy()
+    synthetic.loc[synthetic.index[:30], "income"] = np.nan
+    delta = missing_rate_delta(source, synthetic)
+    assert delta["income"] == pytest.approx(0.1, abs=1e-9)
+    assert delta["age"] == pytest.approx(0.0)
