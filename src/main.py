@@ -344,3 +344,5 @@ if __name__ == '__main__':
 # Implement tabular GAN for synthetic records [2026-05-12T17:05:52]
 
 # WIP: benchmarking against SDV library baseline [2026-05-19T13:10:27]
+
+# Implement data quality validation checks [2026-06-02T16:16:52]
