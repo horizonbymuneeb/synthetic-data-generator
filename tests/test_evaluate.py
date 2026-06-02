@@ -95,3 +95,29 @@ def test_missing_rate_delta_only_compares_shared_columns(source: pd.DataFrame) -
     delta = missing_rate_delta(source, synthetic)
     assert delta["income"] == pytest.approx(0.1, abs=1e-9)
     assert delta["age"] == pytest.approx(0.0)
+
+
+def test_scaled_numeric_is_bounded_and_rejects_non_finite() -> None:
+    frame = pd.DataFrame({"a": [0.0, 5.0, 10.0], "b": [2.0, 2.0, 2.0]})
+    block = scaled_numeric(frame, ["a", "b"])
+    assert block.min() >= 0.0 and block.max() <= 1.0
+    assert np.allclose(block[:, 1], 0.0)  # constant column has no spread
+    with pytest.raises(ValueError, match="non-finite"):
+        scaled_numeric(pd.DataFrame({"a": [1.0, np.nan]}), ["a"])
+
+
+def test_distance_to_closest_record_is_zero_when_rows_are_copied(source: pd.DataFrame) -> None:
+    copied = source[["age", "income", "tenure_months"]].copy()
+    distances = distance_to_closest_record(source, copied, ["age", "income", "tenure_months"])
+    assert distances.shape == (len(copied),)
+    assert float(distances.max()) < 1e-9
+
+
+def test_distance_to_closest_record_grows_for_perturbed_rows(source: pd.DataFrame) -> None:
+    perturbed = source[["age", "income", "tenure_months"]].copy()
+    perturbed["age"] = perturbed["age"].max()
+    perturbed["tenure_months"] = perturbed["tenure_months"].min()
+    copied = source[["age", "income", "tenure_months"]].copy()
+    d_copied = distance_to_closest_record(source, copied, ["age", "income", "tenure_months"]).mean()
+    d_perturbed = distance_to_closest_record(source, perturbed, ["age", "income", "tenure_months"]).mean()
+    assert d_perturbed > d_copied

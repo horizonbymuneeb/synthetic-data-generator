@@ -71,3 +71,27 @@ def income_column(latent: np.ndarray) -> np.ndarray:
     """Second latent factor drives a log-normal monthly income (heavy tail)."""
     log_income = 9.15 + 0.42 * latent[:, 1]
     return np.rint(np.exp(log_income)).astype(np.int64)
+
+
+def tenure_column(latent: np.ndarray) -> np.ndarray:
+    """Third latent factor drives months of tenure, bounded to seven years."""
+    raw = 22.0 + 13.0 * latent[:, 2]
+    return np.clip(np.rint(raw), 0, 84).astype(np.int64)
+
+
+def plan_column(latent: np.ndarray, seed: int) -> np.ndarray:
+    """Plan choice shifts with income: higher earners skew to the pro tier."""
+    rng = np.random.default_rng(seed + 1)
+    income_rank = np.argsort(np.argsort(latent[:, 1])) / max(len(latent) - 1, 1)
+    base = np.asarray(PLAN_WEIGHTS, dtype=float)
+    plans = np.empty(len(latent), dtype=object)
+    for row, rank in enumerate(income_rank):
+        weights = base * np.asarray([1.0 + 0.9 * (1 - rank), 1.0, 0.45 + 1.2 * rank])
+        plans[row] = rng.choice(PLAN_LEVELS, p=weights / weights.sum())
+    return plans
+
+
+def city_column(seed: int, n_rows: int) -> np.ndarray:
+    """City is independent of the latent factors: pure marginal noise."""
+    rng = np.random.default_rng(seed + 2)
+    return rng.choice(CITY_LEVELS, size=n_rows, p=np.asarray(CITY_WEIGHTS) / sum(CITY_WEIGHTS))
