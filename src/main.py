@@ -346,3 +346,5 @@ if __name__ == '__main__':
 # WIP: benchmarking against SDV library baseline [2026-05-19T13:10:27]
 
 # Implement data quality validation checks [2026-06-02T16:16:52]
+
+# Fix generator gradient instability during training [2026-06-03T11:19:43]
