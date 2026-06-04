@@ -95,3 +95,47 @@ def city_column(seed: int, n_rows: int) -> np.ndarray:
     """City is independent of the latent factors: pure marginal noise."""
     rng = np.random.default_rng(seed + 2)
     return rng.choice(CITY_LEVELS, size=n_rows, p=np.asarray(CITY_WEIGHTS) / sum(CITY_WEIGHTS))
+
+
+def churn_column(tenure: np.ndarray, plan: np.ndarray, seed: int) -> np.ndarray:
+    """Churn is a logistic function of tenure and plan tier, then Bernoulli sampled."""
+    rng = np.random.default_rng(seed + 3)
+    plan_risk = np.where(plan == "basic", 0.85, np.where(plan == "plus", 0.0, -0.75))
+    logits = -0.35 - 0.055 * tenure + plan_risk
+    probability = 1.0 / (1.0 + np.exp(-logits))
+    draws = rng.random(len(tenure))
+    return np.where(draws < probability, "yes", "no")
+
+
+def signup_dates(tenure: np.ndarray, start_date: date, seed: int) -> np.ndarray:
+    """Signup date = start of the observation window minus tenure, plus jitter."""
+    rng = np.random.default_rng(seed + 4)
+    jitter = rng.integers(0, 28, size=len(tenure))
+    return np.asarray(
+        [start_date - timedelta(days=int(months) * 30 + int(extra)) for months, extra in zip(tenure, jitter)],
+        dtype="datetime64[D]",
+    )
+
+
+def make_source_table(spec: SourceSpec | None = None) -> pd.DataFrame:
+    """Build the mixed-type source table described by ``spec``."""
+    spec = spec or SourceSpec()
+    latent = latent_normals(spec.n_rows, np.asarray(spec.latent_correlation), spec.seed)
+    age = age_column(latent)
+    income = income_column(latent)
+    tenure = tenure_column(latent)
+    plan = plan_column(latent, spec.seed)
+    city = city_column(spec.seed, spec.n_rows)
+    churn = churn_column(tenure, plan, spec.seed)
+    signup = signup_dates(tenure, spec.start_date, spec.seed)
+    return pd.DataFrame(
+        {
+            "age": age,
+            "income": income,
+            "tenure_months": tenure,
+            "city": pd.Series(city, dtype="object"),
+            "plan": pd.Series(plan, dtype="object"),
+            "churned": pd.Series(churn, dtype="object"),
+            "signup_date": pd.Series(signup, dtype="datetime64[ns]"),
+        }
+    )

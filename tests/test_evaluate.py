@@ -121,3 +121,24 @@ def test_distance_to_closest_record_grows_for_perturbed_rows(source: pd.DataFram
     d_copied = distance_to_closest_record(source, copied, ["age", "income", "tenure_months"]).mean()
     d_perturbed = distance_to_closest_record(source, perturbed, ["age", "income", "tenure_months"]).mean()
     assert d_perturbed > d_copied
+
+
+def test_distance_to_closest_record_needs_columns(source: pd.DataFrame) -> None:
+    with pytest.raises(ValueError, match="numeric columns"):
+        distance_to_closest_record(source, source, [])
+
+
+def test_duplicate_rate_flags_a_copy(source: pd.DataFrame) -> None:
+    exact, internal = duplicate_rate(source, source)
+    assert exact == pytest.approx(1.0)
+    assert internal == pytest.approx(0.0)
+    shuffled = source.sample(frac=1.0, random_state=0)
+    assert duplicate_rate(source, shuffled)[0] == pytest.approx(1.0)
+
+
+def test_duplicate_rate_reports_internal_collapse() -> None:
+    real = pd.DataFrame({"a": [1, 2, 3]})
+    synthetic = pd.DataFrame({"a": [9, 9, 9]})
+    exact, internal = duplicate_rate(real, synthetic)
+    assert exact == pytest.approx(0.0)
+    assert internal == pytest.approx(2 / 3)
