@@ -219,3 +219,5 @@ def format_number(n: int) -> str:
 # Implement conditional GAN for labeled data [2026-05-22T13:25:52]
 
 # WIP: training larger models on cloud GPUs [2026-05-23T16:41:28]
+
+# Implement differential privacy noise addition [2026-06-07T18:17:40]
