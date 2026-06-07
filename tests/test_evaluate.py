@@ -142,3 +142,47 @@ def test_duplicate_rate_reports_internal_collapse() -> None:
     exact, internal = duplicate_rate(real, synthetic)
     assert exact == pytest.approx(0.0)
     assert internal == pytest.approx(2 / 3)
+
+
+def test_fidelity_report_on_identical_frames(source: pd.DataFrame) -> None:
+    report = fidelity(source, source)
+    assert report.mean_ks == pytest.approx(0.0, abs=1e-12)
+    assert report.mean_tv == pytest.approx(0.0, abs=1e-12)
+    assert set(report.ks_by_column) == {"age", "income", "tenure_months"}
+    assert set(report.tv_by_column) == {"city", "plan", "churned"}
+    assert report.worst_columns(2) == sorted(report.ks_by_column.items(), key=lambda item: item[1], reverse=True)[:2]
+
+
+def test_privacy_report_on_identical_frames(source: pd.DataFrame) -> None:
+    report = privacy(source, source)
+    assert report.dcr_mean == pytest.approx(0.0, abs=1e-9)
+    assert report.exact_duplicate_rate == pytest.approx(1.0)
+    assert report.is_copy is True
+    assert set(report.dcr_percentiles) == {"p5", "p50", "p95"}
+
+
+def test_privacy_needs_a_numeric_column() -> None:
+    frame = pd.DataFrame({"plan": ["a", "b"]})
+    with pytest.raises(ValueError, match="numeric column"):
+        privacy(frame, frame)
+
+
+def test_evaluate_combines_both_blocks_and_formats(source: pd.DataFrame) -> None:
+    rng = np.random.default_rng(6)
+    synthetic = source.copy()
+    synthetic["income"] = rng.permutation(synthetic["income"].to_numpy())
+    result = evaluate(source, synthetic)
+    assert result.n_real == len(source)
+    assert result.n_synthetic == len(synthetic)
+    summary = result.summary()
+    assert {"mean_ks", "mean_tv", "dcr_mean", "exact_duplicate_rate"} <= set(summary)
+    text = format_report(result)
+    assert "fidelity" in text and "privacy" in text
+    assert "distance to closest record" in text
+
+
+def test_evaluate_rejects_empty_or_disjoint_frames(source: pd.DataFrame) -> None:
+    with pytest.raises(ValueError, match="non-empty"):
+        evaluate(source, source.iloc[0:0])
+    with pytest.raises(ValueError, match="share no columns"):
+        evaluate(source, pd.DataFrame({"other": [1, 2, 3]}))

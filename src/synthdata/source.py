@@ -139,3 +139,17 @@ def make_source_table(spec: SourceSpec | None = None) -> pd.DataFrame:
             "signup_date": pd.Series(signup, dtype="datetime64[ns]"),
         }
     )
+
+
+def write_source_csv(table: pd.DataFrame, path: str) -> None:
+    """Persist the source table so the CLI can reuse one copy across runs."""
+    table.to_csv(path, index=False)
+
+
+def read_source_csv(path: str) -> pd.DataFrame:
+    """Load a table written by :func:`write_source_csv`, restoring dtypes."""
+    frame = pd.read_csv(path)
+    for column in frame.columns:
+        if column.endswith("_date"):
+            frame[column] = pd.to_datetime(frame[column])
+    return frame
