@@ -225,3 +225,5 @@ def format_number(n: int) -> str:
 # Add synthetic time series generation module [2026-06-08T19:12:31]
 
 # WIP: debugging mode collapse in generator [2026-06-09T16:24:24]
+
+# Implement data quality validation checks [2026-06-10T14:07:39]
