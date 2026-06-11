@@ -352,3 +352,5 @@ if __name__ == '__main__':
 # Implement latent space interpolation for samples [2026-06-04T17:20:13]
 
 # Fix generator gradient instability during training [2026-06-07T20:27:35]
+
+# Add evaluation with FID score metric [2026-06-11T17:32:12]
