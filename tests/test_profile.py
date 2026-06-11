@@ -62,3 +62,48 @@ def test_categorical_stats_are_sorted_by_frequency() -> None:
     assert stats.probability("b") == pytest.approx(0.2)
     with pytest.raises(KeyError):
         stats.probability("zzz")
+
+
+def test_datetime_granularity_is_the_coarsest_that_still_separates() -> None:
+    days = pd.Series(pd.to_datetime(["2024-01-01", "2024-01-02"]), name="d")
+    months = pd.Series(pd.to_datetime(["2024-01-01", "2024-02-01"]), name="d")
+    years = pd.Series(pd.to_datetime(["2023-01-01", "2024-01-01"]), name="d")
+    assert infer_granularity(days) == "D"
+    assert infer_granularity(months) == "M"
+    assert infer_granularity(years) == "Y"
+    assert datetime_stats(months).span_days == 31
+
+
+def test_profile_column_reports_missing_rate_and_kind() -> None:
+    column = profile_column(pd.Series([1.0, np.nan, 3.0, 5.0], name="income"))
+    assert column.kind is ColumnKind.NUMERIC
+    assert column.missing_rate == pytest.approx(0.25)
+    assert column.n_unique == 3
+    assert column.numeric is not None and column.categorical is None
+
+
+def test_profile_frame_covers_the_generated_source_table() -> None:
+    frame = make_source_table(SourceSpec(n_rows=200, seed=3))
+    profile = profile_frame(frame)
+    assert profile.n_rows == 200
+    assert profile.numeric_columns == ["age", "income", "tenure_months"]
+    assert set(profile.categorical_columns) == {"city", "plan", "churned"}
+    assert profile.datetime_columns == ["signup_date"]
+    with pytest.raises(KeyError):
+        profile.column("not_a_column")
+
+
+def test_describe_profile_lists_every_column() -> None:
+    frame = make_source_table(SourceSpec(n_rows=120, seed=5))
+    text = describe_profile(profile_frame(frame))
+    assert "120 rows" in text
+    for column in frame.columns:
+        assert column in text
+    assert "numeric" in text and "categorical" in text
+
+
+def test_profile_frame_rejects_empty_input() -> None:
+    with pytest.raises(ValueError, match="no columns"):
+        profile_frame(pd.DataFrame())
+    with pytest.raises(ValueError, match="empty frame"):
+        profile_frame(pd.DataFrame({"age": []}))
